@@ -79,6 +79,55 @@ Tech lessons we're taking from it:
 - Model plan steps in their own tables, because they're queried across
   projects. Store the few free-form bits as validated JSON.
 
+## 2b. Experience & theming
+
+The portal is a **design-forward selection space**, not an admin tool. Every
+customer area should look like that chain's or developer's space and like
+Metro's at the same time.
+
+### Three theme layers
+Themes resolve **project → customer → Metro**. Each layer is a set of design
+tokens (CSS custom properties) plus assets. A layer only overrides what it sets.
+
+| Layer | Owned by | Holds |
+|---|---|---|
+| **Metro base** | Marketing | The portal's own look, built from Metro's two brand efforts (below). Includes type, colour, spacing, surfaces and components. |
+| **Customer brand kit** (chain or developer) | Marketing, per customer | Logo variants (light/dark, SVG preferred), primary and secondary colours, optional licensed display font (woff2), banner imagery with focal point, optional pattern or texture |
+| **Project theme** | Project rep | Hero and banner images (e.g. property renderings), accent override, and which customer kit applies (e.g. a Marriott property by a developer) |
+
+### Metro's two brand efforts map to different parts of the UI
+- **Box & book** (Metro's branded sample box and book) sets the look of the
+  product-facing surfaces: the micro-catalog, product detail, sample requests
+  and swatches. These are the places where a customer handles the product.
+- **Presentation brand** (the PowerPoint structure) sets the page structure:
+  title and section-divider layouts, grid, type hierarchy, and how Overview,
+  Plan and Quotes are composed. These are the places where Metro presents to
+  the customer.
+
+### Rules that keep it usable
+- Customer colours **decorate** the hero, headers, accent rules and
+  wayfinding. Metro owns the **controls**: buttons, inputs and focus states.
+  Every project therefore behaves the same, and a customer's colour can't make
+  a button unreadable.
+- **Status colours are fixed** (approved, in review, revision) and never taken
+  from a brand kit.
+- Contrast is checked when a kit is saved. If a brand colour fails against
+  text, the portal derives a darker or lighter step for text use and keeps the
+  original for decoration.
+
+### Project landing: "Day / Night" split
+The project home opens with a hero split on a subtle diagonal (about 8–12°).
+- **Day** (left): the customer's side, with their banner image, colours and logo.
+- **Night** (right): Metro's side, with the Metro brand and the named rep.
+
+The diagonal carries both logos across the seam. On phones the split stacks,
+and the seam becomes a shallow slant between the two bands.
+
+### Brand kit editor (phase 1b)
+Marketing uploads logos, colours, fonts and banners per customer, and gets a
+live preview of the Day/Night hero in light and dark themes. Projects inherit
+from the kit and can override it.
+
 ## 3. System context
 
 ```mermaid
@@ -163,10 +212,11 @@ later. The question is which cost we'd rather pay.
 
 | Entity | Key fields |
 |--------|-----------|
-| `Organization` | name, type (brand, architect, developer, GC, owner) |
+| `Organization` | name, type (brand, architect, developer, GC, owner), brand_kit |
+| `BrandKit` | owner org (or Metro), logos (light/dark), colours, derived text-safe steps, font files, banners (with focal point), pattern, version |
 | `User` | uuid, name, email, organization, is_staff |
 | `IdentityLink` | user, provider (`entra`, `commerce`), subject |
-| `Project` | slug, name, brand, location, stage, sf_opportunity_id, theme (client logo, accent, banner), welcome text, internal notes |
+| `Project` | slug, name, brand, location, stage, sf_opportunity_id, brand_kit (inherited), theme overrides (hero/banner images, accent), welcome text, internal notes |
 | `ProjectMember` | project, user, role (`rep`, `customer_admin`, `reviewer`, `viewer`) |
 | `Area` | project, name ("Guest Rooms", "Corridors"), quantity + unit (SY/SF) |
 | `Selection` | project, area, sku, product snapshot (JSON), status (`proposed`, `in_review`, `approved`, `revise`, `rejected`, `alternate`), qty, notes |
