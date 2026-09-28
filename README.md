@@ -8,5 +8,5 @@ It runs beside Adobe Commerce (`store.metrofloors.com`), using it for customer
 logins and catalog data only, so the portal can outlive a platform change.
 
 - [`docs/PLAN.md`](docs/PLAN.md): architecture, identity, data model, integrations, phases, open questions
-- [`prototype/index.html`](prototype/index.html): static clickable prototype (open in a browser; use "Viewing as" to switch roles)
+- [`prototype/index.html`](prototype/index.html): static clickable prototype themed on the Metropolitan brand (open in a browser; use "Viewing as" to switch roles). Images in `prototype/assets/` are cropped from the A&D Kit Unboxing deck; banners are placeholders for customer-supplied imagery.
 - [`docs/reference/aligned/`](docs/reference/aligned/): notes and data-model shapes from the Aligned (teamaligned.com) reference walkthrough

@@ -92,17 +92,27 @@ tokens (CSS custom properties) plus assets. A layer only overrides what it sets.
 | Layer | Owned by | Holds |
 |---|---|---|
 | **Metro base** | Marketing | The portal's own look, built from Metro's two brand efforts (below). Includes type, colour, spacing, surfaces and components. |
-| **Customer brand kit** (chain or developer) | Marketing, per customer | Logo variants (light/dark, SVG preferred), primary and secondary colours, optional licensed display font (woff2), banner imagery with focal point, optional pattern or texture |
+| **Customer brand kit** (chain or developer) | Marketing, per customer | Logo variants (light/dark, SVG preferred), primary and secondary colours, optional licensed display font (woff2), banner imagery with focal point. Drives the left side of the split background |
 | **Project theme** | Project rep | Hero and banner images (e.g. property renderings), accent override, and which customer kit applies (e.g. a Marriott property by a developer) |
 
 ### Metro's two brand efforts map to different parts of the UI
-- **Box & book** (Metro's branded sample box and book) sets the look of the
-  product-facing surfaces: the micro-catalog, product detail, sample requests
-  and swatches. These are the places where a customer handles the product.
-- **Presentation brand** (the PowerPoint structure) sets the page structure:
-  title and section-divider layouts, grid, type hierarchy, and how Overview,
-  Plan and Quotes are composed. These are the places where Metro presents to
-  the customer.
+Taken from the *A&D Kit Unboxing* deck:
+
+- **Box & book** sets the product-facing surfaces and the chrome:
+  - **Look:** matte onyx black, copper/gold foil for the M mark and a
+    wide-tracked METROPOLITAN wordmark, leather-tan accents, and "Stand on
+    pride.". The book's tone-on-tone embossed city names become the texture
+    on Metropolitan's side of the background.
+  - **Where:** the top bar, the product drawer, the A&D kit cards and the
+    swatch-first selection cards.
+  - **The kits themselves:** the Light / Medium / Dark A&D kits and the 12
+    colour families, whose L/M/D codes are already in Salesforce, become the
+    micro-catalog's filters and the Samples & kits page.
+- **Presentation deck** sets the page structure:
+  - white content pages, each section opening with an onyx title band like
+    the information cards (a tracked-caps eyebrow over a heavy sans headline)
+  - the full-width copper footer band carrying WWW.METROFLOORS.COM and
+    INTEGRITY · HUMANITY · PASSION
 
 ### Rules that keep it usable
 - Customer colours **decorate** the hero, headers, accent rules and
@@ -115,17 +125,32 @@ tokens (CSS custom properties) plus assets. A layer only overrides what it sets.
   text, the portal derives a darker or lighter step for text use and keeps the
   original for decoration.
 
-### Project landing: "Day / Night" split
-The project home opens with a hero split on a subtle diagonal (about 8–12°).
-- **Day** (left): the customer's side, with their banner image, colours and logo.
-- **Night** (right): Metro's side, with the Metro brand and the named rep.
+### Customer space background: the split
+Inside a customer's project, the whole page background is split:
+- **Left:** the customer's brand (banner image, colours, typeface).
+- **Right:** Metropolitan (onyx, embossed cities).
+- **The seam:** a soft fade on a line **25° off vertical**, with a faint
+  copper glow where the two meet.
 
-The diagonal carries both logos across the seam. On phones the split stacks,
-and the seam becomes a shallow slant between the two bands.
+The background stays fixed while content scrolls over it on white panels, so
+the content stays readable whatever the customer's imagery. The angle is one
+design token (`--tilt`), and the Branding tab has a slider to review
+alternatives. On the login page the same split pairs a lifestyle photo with
+the sign-in form.
+
+### Production notes from the brand review
+- The deck's body face is **Acumin Pro** (Adobe Fonts). The prototype
+  substitutes Archivo and Jost from Google Fonts. Production should load
+  Acumin through an Adobe Fonts web project.
+- The M mark in the prototype is a redrawn SVG approximation. Marketing
+  should supply the vector logo.
+- White text on the deck copper (#B77729) is only 3.7:1. The footer band
+  uses a deeper copper (#9E6421, 4.9:1). Copper text on white uses #8A5617.
+- Prototype product names apart from Kentwood Cazador are sample data.
 
 ### Brand kit editor (phase 1b)
 Marketing uploads logos, colours, fonts and banners per customer, and gets a
-live preview of the Day/Night hero in light and dark themes. Projects inherit
+live preview of the split background in light and dark themes. Projects inherit
 from the kit and can override it.
 
 ## 3. System context
