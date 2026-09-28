@@ -1,0 +1,359 @@
+{
+  "_about": "Shapes observed in Aligned JSON responses (keys/types). Values omitted. Captured 2026-09-28.",
+  "ids": "MongoDB ObjectId strings (24 hex); tab content ids also use UUIDs in some routes",
+  "Room (aka dealmap / project)": {
+    "_id": "ObjectId",
+    "owner": "User",
+    "clientCompanyName": "string",
+    "clientLogo": "url",
+    "tabs": "Tab[]",
+    "analytics": "RoomAnalytics",
+    "closedDealRef": "CRM ref",
+    "didCelebrateWon": "boolean",
+    "closedStatus": "active|won|lost"
+  },
+  "Tab": {
+    "_id": "ObjectId",
+    "roomId": "ObjectId",
+    "uri": "string (overview, overview-2, plan, internal, resources)",
+    "type": "GENERAL | MAP | FILES",
+    "title": "string",
+    "isHidden": "boolean",
+    "isInternal": "boolean",
+    "allowedList": "[] (tab permissions)",
+    "tabContent": "TabContent",
+    "createdAt": "date",
+    "updatedAt": "date"
+  },
+  "TabContent": {
+    "_id": "ObjectId",
+    "roomId": "ObjectId",
+    "tabId": "ObjectId",
+    "sections": "Section[]"
+  },
+  "Section": {
+    "_id": "ObjectId",
+    "type": "SELLER | TEAM | SINGLE_EMBEDDED | MULTIPLE_EMBEDDED | TIMELINE | LIST | ACTION_ITEMS | (TEXT, CRM, …)",
+    "headline": "string",
+    "content": "ContentItem[]",
+    "contentRef": "ActionPlan (ACTION_ITEMS only)",
+    "isHidden": "boolean",
+    "enableHeadlineEditing": "boolean",
+    "enableIsHidden": "boolean",
+    "isPreviewEditable": "boolean",
+    "metadataId": "ObjectId",
+    "comments": "Comment[]",
+    "commentsCount": "number",
+    "commentsNotesCount": "number"
+  },
+  "ContentItem": {
+    "_id": "ObjectId",
+    "title": "string",
+    "headline": "string",
+    "description": "string (html)",
+    "isDone": "boolean (TIMELINE)",
+    "resource": "Resource",
+    "resources": "Resource[]",
+    "subtasks": "[]",
+    "ownerUserId": "User (SELLER)",
+    "sellerUser": "User[]",
+    "buyerUser": "{index:number, user:User}[] (TEAM)",
+    "sectionUser": "[]",
+    "comments": "[]"
+  },
+  "ActionPlan": {
+    "_id": "ObjectId",
+    "sectionId": "ObjectId",
+    "dealmapId": "ObjectId",
+    "tabId": "ObjectId",
+    "stages": [
+      {
+        "_id": "ObjectId",
+        "headline": "string",
+        "isHidden": "boolean",
+        "actionItems": [
+          {
+            "_id": "ObjectId",
+            "headline": "string",
+            "isDone": "boolean",
+            "assignee": "User|null",
+            "assignee2": "User|null",
+            "startDate": "date|null",
+            "date": "date|null",
+            "status": "Not Started|On Track|At Risk|Delayed|null",
+            "metadataId": "ObjectId",
+            "commentsCount": "number",
+            "commentsNotesCount": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "Resource": {
+    "_id": "ObjectId",
+    "name": "string",
+    "description": "string",
+    "url": "string",
+    "embeddedCodeSnippet": "string",
+    "type": "EMBEDDED_LINK | PDF | PPTX | VIDEO | …",
+    "metaType": "string",
+    "status": "string",
+    "access": "string",
+    "folderId": "ObjectId",
+    "isArchived": "boolean",
+    "isInternal": "boolean",
+    "owner": "User",
+    "parentResourceId": "ObjectId|null"
+  },
+  "User": {
+    "_id": "ObjectId",
+    "name": "string",
+    "email": "string",
+    "userType": "seller|buyer|…",
+    "status": "string",
+    "role": {
+      "key": "string",
+      "title": "string",
+      "department": "object",
+      "hierarchyLevel": "object",
+      "seniority": "object"
+    },
+    "accountId": {
+      "_id": "ObjectId",
+      "accountType": "string"
+    },
+    "picture": "url",
+    "avatarColor": "string",
+    "defaultView": "string",
+    "anonymousEmail": "string",
+    "anonymousTokenId": "string (anonymous visitor tracking)",
+    "publicId": "string",
+    "visitedDates": "date[]",
+    "sessionFirstActivity": "date",
+    "sessionLastActivity": "date",
+    "featureToggles": "object"
+  },
+  "AnalyticsOverview (GET /analytics/overview/:roomId → data.overview)": {
+    "topVisitors": "User[] (+ session fields)",
+    "companies": "[]",
+    "roomAnalytics": {
+      "visitors": "number",
+      "lastViewed": "date",
+      "firstViewed": "date",
+      "trendDateList": "{YYYY-MM-DD: …} last 7 days",
+      "totalInteractions": "number",
+      "linksOpened": "number",
+      "totalVisits": "number",
+      "totalTime": "number (seconds)",
+      "totalAiAssisted": "number",
+      "trend": "Heating | Hot | Cold | …"
+    },
+    "uniqueVisits": "number",
+    "totalComments": "number",
+    "visitedTabs": "[]",
+    "crmInsights": {
+      "isCrmAvailable": "boolean"
+    },
+    "latestActions": "[]",
+    "mostEngagedContent": "[]",
+    "engagementTrend": {
+      "scope": "string",
+      "dataPoints": "[]",
+      "isTruncated": "boolean"
+    },
+    "engagedVisitors": "[]",
+    "aiDealInsights": {
+      "aiDealInsights": "[]",
+      "aiDealInsightsInfo": "object"
+    },
+    "dealMap": "Room (compact)",
+    "aiHighlightsSummary": "object"
+  },
+  "Envelope": {
+    "status": "boolean",
+    "message": "string",
+    "data": "payload"
+  },
+  "endpoints (under /api/v1)": [
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/accounts/:accountId/",
+      "purpose": "Account profile"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/accounts/:accountId/features",
+      "purpose": "Plan features"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/featuretoggles/:accountId/list",
+      "purpose": "Feature flags"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/featuretoggles/room/:roomId/ROOM_USE_AI_CHAT_V2",
+      "purpose": "Per-room flag"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/users/:accountId/account/:userId",
+      "purpose": "Current user"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/billing/:accountId/info",
+      "purpose": "Plan & billing (Chargebee)"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/limits/:accountId/getCurrentUsageByLimitType/:LIMIT/resource/:id",
+      "purpose": "Usage vs limits (CRM_ROOM_PER_USER_HUBSPOT, USER_PER_ACCOUNT)"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/limits/:accountId/getLimitValue/:LIMIT/resource/:id",
+      "purpose": "Limit value"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/permissions/:accountId/dealmap/:userId",
+      "purpose": "Permission set"
+    },
+    {
+      "group": "Session / account",
+      "method": "GET",
+      "path": "/userChoices/list · /users/tutorialRoom",
+      "purpose": "Onboarding state"
+    },
+    {
+      "group": "Rooms",
+      "method": "GET",
+      "path": "/projects/room/my/all · /room/team/all · /room/latestActivity/all",
+      "purpose": "Room lists per filter"
+    },
+    {
+      "group": "Rooms",
+      "method": "GET",
+      "path": "/projects/compact",
+      "purpose": "Room picker"
+    },
+    {
+      "group": "Rooms",
+      "method": "GET",
+      "path": "/projects/:accountId/project/:roomId",
+      "purpose": "Room detail"
+    },
+    {
+      "group": "Rooms",
+      "method": "GET",
+      "path": "/projects/:accountId/project/:roomId/settings",
+      "purpose": "Room settings"
+    },
+    {
+      "group": "Rooms",
+      "method": "GET",
+      "path": "/projects/project/:roomId/users · /project/:roomId/token",
+      "purpose": "Room members · share token"
+    },
+    {
+      "group": "Rooms",
+      "method": "GET",
+      "path": "/accounts/columns",
+      "purpose": "Saved table columns"
+    },
+    {
+      "group": "Templates",
+      "method": "GET",
+      "path": "/projects/:accountId/alignedTemplates · /projects/userRecentTemplates/ · /projects/template/my · /template/team",
+      "purpose": "Template sources"
+    },
+    {
+      "group": "Tabs & sections",
+      "method": "GET",
+      "path": "/tabs/all/:roomId",
+      "purpose": "Tab list"
+    },
+    {
+      "group": "Tabs & sections",
+      "method": "GET",
+      "path": "/tabs/:roomId/:tabUri/:tabId",
+      "purpose": "Tab with sections (MAP includes contentRef.stages)"
+    },
+    {
+      "group": "Tabs & sections",
+      "method": "PUT",
+      "path": "/itemMetadata/:metadataId/",
+      "purpose": "Per-user item metadata (fired when opening a task)"
+    },
+    {
+      "group": "Tabs & sections",
+      "method": "GET",
+      "path": "/activities/:actionItemId",
+      "purpose": "Task activity log"
+    },
+    {
+      "group": "Comments",
+      "method": "GET",
+      "path": "/comments/:roomId",
+      "purpose": "All threads in room"
+    },
+    {
+      "group": "Library",
+      "method": "GET",
+      "path": "/library · /library/v2 · /resources/:roomId",
+      "purpose": "Resources/folders"
+    },
+    {
+      "group": "Library",
+      "method": "—",
+      "path": "/upload",
+      "purpose": "Upload endpoint (preflight seen)"
+    },
+    {
+      "group": "Analytics",
+      "method": "GET",
+      "path": "/analytics/dealmap/:roomId/ · /analytics/overview/:roomId",
+      "purpose": "Room analytics"
+    },
+    {
+      "group": "Analytics",
+      "method": "GET",
+      "path": "/stakeholders/:roomId · /stakeholderRoles/:accountId",
+      "purpose": "Org chart"
+    },
+    {
+      "group": "Analytics",
+      "method": "POST/PUT",
+      "path": "/aiDealInsights/:roomId/mark-viewed",
+      "purpose": "Mark insights seen"
+    },
+    {
+      "group": "AI",
+      "method": "GET",
+      "path": "/aiDealBuilder/isEnabledForUser · /ai/hasChatV2/:roomId/:tabUuid · /sellerAssist/dealEditor/debugEnabled",
+      "purpose": "AI capability checks"
+    },
+    {
+      "group": "Integrations",
+      "method": "GET",
+      "path": "/integration/getIntegration/default/{ACCOUNT|USER|ROOM}/:id · /integration/groupsIntegrations",
+      "purpose": "Connected integrations"
+    },
+    {
+      "group": "Misc",
+      "method": "GET",
+      "path": "/settings/notification/default · /userContacts/list · /groups/:id · /ipstack/check · /referral/tracking · /cello/*",
+      "purpose": "Defaults, contacts, groups, geo-IP, referrals"
+    }
+  ]
+}

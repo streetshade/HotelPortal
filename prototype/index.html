@@ -152,7 +152,8 @@ textarea.input { min-height: 84px; resize: vertical; }
 .rail button:hover { background: var(--sunk); color: var(--ink); }
 .rail button[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: inset 3px 0 0 var(--accent); }
 .rail .count { font-size: .72rem; font-family: var(--f-mono); color: var(--muted); }
-.content { display: grid; gap: 20px; align-content: start; min-width: 0; }
+.content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; min-width: 0; }
+.content > * { min-width: 0; }
 .sec-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .75rem; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
 .panel-pad { padding: 18px; }
@@ -271,6 +272,54 @@ tfoot td { font-weight: 600; border-top: 1px solid var(--line); }
 .team-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--ground); padding: .6rem 1rem; border-radius: 6px; z-index: 60; font-size: .88rem; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+
+/* Aligned-derived patterns: dual marks, preview mode, plan, welcome, internal, engagement */
+.head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; }
+.head-title { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.marks { display: flex; flex: none; }
+.mark { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,.85); display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: .8rem; }
+.mark.ours { background: repeating-linear-gradient(45deg, #FFFFFF 0 3px, transparent 3px 6px), #22594F; }
+.mark.theirs { background: #F4F1E8; color: #1B2320; margin-left: -10px; }
+.seg.mode { background: rgba(0,0,0,.25); }
+.seg.mode button { color: rgba(255,255,255,.85); }
+.seg.mode button[aria-pressed="true"] { background: #FFFFFF; color: #1B2320; }
+.preview-bar { background: var(--st-proposed-bg); color: var(--st-proposed); font-size: .85rem; font-weight: 500; padding-block: .55rem; }
+.rail-sep { padding: .9rem .7rem .2rem; }
+.welcome { display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+.welcome-rep { display: grid; justify-items: center; align-content: center; text-align: center; gap: .25rem; padding: 20px; border-right: 1px solid var(--line); }
+.welcome-rep .avatar { width: 64px; height: 64px; font-size: 1.3rem; margin-bottom: .3rem; }
+.welcome-rep .mono { overflow-wrap: anywhere; }
+.welcome-body { padding: 20px 22px; display: grid; gap: .7rem; align-content: start; max-width: 70ch; }
+.stake { display: grid; gap: 10px; }
+.person { display: flex; gap: 10px; align-items: center; font-size: .88rem; }
+.progress { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.steps { display: grid; }
+.step { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; gap: 12px; align-items: center; padding: 10px 18px; border-top: 1px solid var(--line); }
+.step .avatar { width: 28px; height: 28px; font-size: .68rem; }
+.step.done .step-t { color: var(--muted); text-decoration: line-through; }
+.step-t { cursor: pointer; }
+.step-date { color: var(--muted); min-width: 64px; text-align: right; }
+.tick { width: 18px; height: 18px; accent-color: var(--accent); }
+.add-step { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 18px; border-top: 1px dashed var(--line); }
+.add-step .input { flex: 1; min-width: 180px; }
+.inline { display: inline-flex; gap: .35rem; align-items: center; font-size: .85rem; color: var(--muted); }
+.msg.internal .bubble { background: var(--st-proposed-bg); border: 1px dashed var(--st-proposed); }
+.linkish { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.hbar { display: grid; grid-template-columns: 90px minmax(0, 1fr) 44px; gap: 10px; align-items: center; font-size: .86rem; }
+.hbar .track { height: 10px; }
+.hbar i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.hbar:hover i { filter: brightness(1.15); }
+.hbar .num { text-align: right; }
+@media (max-width: 900px) { .rail-sep { display: none; } }
+@media (max-width: 700px) {
+  .welcome { grid-template-columns: minmax(0, 1fr); }
+  .welcome-rep { border-right: 0; border-bottom: 1px solid var(--line); }
+  .step { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .step .step-date, .step .avatar { display: none; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpis div { border-bottom: 1px solid var(--line); }
+}
 
 @media (max-width: 900px) {
   .work { grid-template-columns: minmax(0, 1fr); gap: 16px; }
@@ -431,6 +480,7 @@ const PROJECTS = [
       { id: "t1", subject: "Corridor Axminster: medallion scale", anchor: "s3", msgs: [
         { user: "marco", when: "Sep 25, 9:12 AM", body: "At a 36\" repeat the medallion lands off-centre at every third door recess. Could the design team run a 30\" version?" },
         { user: "dana", when: "Sep 25, 11:40 AM", body: "Yes. Design will have a 30\" rendering by Friday. The strike-off already in production is 36\", so we'd do a second strike-off if 30\" wins.", file: "corridor-door-spacing.pdf" },
+        { user: "kate", when: "Sep 25, 12:15 PM", internal: true, body: "Mill confirms a 30\" repeat needs a new strike-off, about 3 weeks. Don't commit to Oct 9 for approval." },
         { user: "priya", when: "Sep 25, 2:05 PM", body: "Brand is fine with either scale as long as the brass reads at the same weight." } ] },
       { id: "t2", subject: "Lobby LVT: warmer option", anchor: "s5", msgs: [
         { user: "priya", when: "Sep 19, 4:30 PM", body: "Coastal Grey reads cold next to the Cask Oak. What's the closest warmer or lighter colorway?" },
@@ -447,12 +497,34 @@ const PROJECTS = [
       { user: "jordan", role: "Reviewer", status: "Active" },
       { user: "sam", role: "Viewer", status: "Active" }
     ],
-    milestones: [
-      { date: "Aug 29", label: "Schematic design sign-off", done: true },
-      { date: "Oct 16", label: "Package 01 approval (Guest Rooms & Corridors)" },
-      { date: "Nov 20", label: "Package 02 approval (Lobby, Ballroom, Fitness)" },
-      { date: "Apr 2027", label: "Guestroom install start, levels 2–6" }
+    clientMark: "H&P",
+    welcome: "Welcome to the Austin Downtown flooring workspace. Selections by area, samples, drawings and submittals, quotes and our shared plan to the Q2 install window all live here. Anything marked In review is waiting on your decision. Message me here rather than by email so the whole team sees the answer.",
+    plan: [
+      { id: "g1", name: "Design development", steps: [
+        { id: "k1", t: "Brand standards review (FF&E flooring)", owner: "priya", date: "Aug 29", status: "On track", done: true },
+        { id: "k2", t: "Hand samples to the design team", owner: "dana", date: "Sep 5", status: "On track", done: true },
+        { id: "k3", t: "Lobby LVT colorway decision", owner: "priya", date: "Oct 3", status: "Delayed" },
+        { id: "k4", t: "Corridor Axminster strike-off approval", owner: "marco", date: "Oct 9", status: "At risk" },
+        { id: "k5", t: "Confirm Axminster loom slot with the mill", owner: "dana", date: "Oct 10", status: "On track", internal: true } ] },
+      { id: "g2", name: "Submittals & pricing", steps: [
+        { id: "k6", t: "Margin review with sales director", owner: "dana", date: "Oct 14", status: "Not started", internal: true },
+        { id: "k7", t: "Package 01 approval (Guest Rooms & Corridors)", owner: "jordan", date: "Oct 16", status: "On track" },
+        { id: "k8", t: "Accept quote Q-26-0418", owner: "jordan", date: "Oct 20", status: "Not started" },
+        { id: "k9", t: "Credit application and PO", owner: "jordan", date: "Oct 31", status: "Not started" } ] },
+      { id: "g3", name: "Production & install", steps: [
+        { id: "k10", t: "Package 02 approval (Lobby, Ballroom, Fitness)", owner: "marco", date: "Nov 20", status: "Not started" },
+        { id: "k11", t: "Release to production", owner: "dana", date: "Dec 1", status: "Not started" },
+        { id: "k12", t: "Guestroom install start, levels 2–6", owner: "sam", date: "Apr 2027", status: "Not started" } ] }
     ],
+    crm: { Opportunity: "Harbor & Pine Austin · Flooring", Stage: "Proposal / Price Quote", "Close date": "Oct 31, 2026", Amount: "$403,500", Probability: "60%", "Next step": "Win corridor strike-off at 30\" repeat" },
+    notes: "Brand standard FF-04 locks the guest room broadloom, so price is the only lever there. Corridors are the swing: Marco prefers 30\" repeat. A second strike-off adds ~3 weeks. Jordan's GC (Northgate) has used a competitor's LVT on two prior Brightline jobs.",
+    engagement: {
+      kpis: [ ["Visits", "38"], ["Active people", "5 of 6"], ["Time in portal", "3h 12m"], ["Downloads", "14"], ["Decisions logged", "11"] ],
+      trend: "Active this week",
+      tabs: [ ["Selections", 46], ["Documents", 18], ["Messages", 14], ["Overview", 9], ["Quotes", 7], ["Plan", 4], ["Samples", 2] ],
+      people: [ ["marco", "Today, 9:12 AM", 14, "1h 21m", "Reviewed Meridian Axminster"], ["priya", "Yesterday", 11, "58m", "Opened quote Q-26-0418"], ["jordan", "Sep 24", 7, "31m", "Downloaded Submittal Package 01"], ["sam", "Sep 17", 4, "12m", "Viewed A-601 Finish Plan"], ["kate", "Sep 15", 2, "10m", "Uploaded specs"] ],
+      content: [ ["Meridian Axminster · CAD Rendering R2.pdf", 19, 6, "Today"], ["Submittal Package 01 · Guest Rooms.pdf", 12, 4, "Sep 24"], ["A-601 Finish Plan · Levels 2–12.pdf", 9, 3, "Sep 22"], ["Tidewater Broadloom · Spec Sheet.pdf", 6, 1, "Sep 12"] ]
+    },
     activity: [
       { user: "marco", text: "requested a revision on <b>Meridian Axminster</b>", when: "Sep 25" },
       { user: "priya", text: "requested a sample of <b>Meridian Axminster</b> strike-off", when: "Sep 25" },
@@ -470,7 +542,7 @@ const PROJECTS = [
       { id: "s22", area: "b2", sku: "CT-3310-MS", status: "in_review", qty: "1,500 SY", note: "", reviews: [] }
     ],
     samples: [], docs: [], quotes: [], threads: [], team: [ { user: "dana", role: "Sales rep", status: "Active" }, { user: "priya", role: "Customer admin · Reviewer", status: "Active" } ],
-    milestones: [ { date: "Oct 30", label: "Final submittal approval" } ], activity: []
+    clientMark: "LC", plan: [ { id: "g21", name: "Submittals", steps: [ { id: "k21", t: "Final submittal approval", owner: "priya", date: "Oct 30", status: "On track" } ] } ], activity: []
   },
   {
     id: "p3", slug: "crestline-suites-dtc", name: "Crestline Suites · Denver Tech Center", brand: "Crestline Suites", city: "Greenwood Village, CO",
@@ -478,14 +550,15 @@ const PROJECTS = [
     areas: [ { id: "c1", name: "Guest Rooms", qty: "5,200 SY" } ],
     selections: [ { id: "s31", area: "c1", sku: "CT-2208-GR", status: "proposed", qty: "5,200 SY", note: "Initial concept.", reviews: [] } ],
     samples: [], docs: [], quotes: [], threads: [], team: [ { user: "dana", role: "Sales rep", status: "Active" }, { user: "jordan", role: "Reviewer", status: "Active" } ],
-    milestones: [ { date: "Dec 5", label: "Concept presentation" } ], activity: []
+    clientMark: "CS", plan: [ { id: "g31", name: "Concept", steps: [ { id: "k31", t: "Concept presentation", owner: "dana", date: "Dec 5", status: "Not started" } ] } ], activity: []
   }
 ];
 
 /* ---------- State ---------- */
-const TABS = ["overview", "selections", "samples", "documents", "quotes", "messages", "team"];
-const TAB_LABEL = { overview: "Overview", selections: "Selections", samples: "Samples", documents: "Documents", quotes: "Quotes", messages: "Messages", team: "Team" };
-const S = { view: "login", role: "brand", pid: "p1", tab: "overview", sel: null, modal: null,
+const TABS = ["overview", "plan", "selections", "samples", "documents", "quotes", "messages", "team", "internal", "engagement"];
+const STAFF_TABS = ["internal", "engagement"];
+const TAB_LABEL = { overview: "Overview", plan: "Plan", selections: "Selections", samples: "Samples", documents: "Documents", quotes: "Quotes", messages: "Messages", team: "Team", internal: "Internal", engagement: "Engagement" };
+const S = { view: "login", role: "brand", pid: "p1", tab: "overview", sel: null, modal: null, preview: false,
   f: { status: "all", q: "" }, docCat: "All", thread: "t1", sampleDraft: [], confirmQuote: null, toast: null };
 
 const $app = document.getElementById("app");
@@ -499,6 +572,13 @@ const chip = st => `<span class="chip s-${st}">${STATUS[st]}</span>`;
 const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const canAdmin = () => isStaff() || proj().team.some(t => t.user === me() && t.role.startsWith("Customer admin"));
 const isReviewer = () => REVIEWERS.includes(me());
+/* What this viewer may see. The real build does this server-side (projectForViewer) so internal data never reaches a client browser. */
+const staffView = () => isStaff() && !S.preview;
+const visibleTabs = () => TABS.filter(t => staffView() || !STAFF_TABS.includes(t));
+const visibleSteps = st => st.steps.filter(k => staffView() || !k.internal);
+const visibleMsgs = th => th.msgs.filter(m => staffView() || !m.internal);
+function planProgress(p) { const all = p.plan.flatMap(visibleSteps); return { done: all.filter(k => k.done).length, total: all.length }; }
+const STEP_CLS = { "On track": "s-approved", "At risk": "s-in_review", "Delayed": "s-revise", "Not started": "s-muted" };
 
 function recompute(sel) {
   if (sel.status === "alternate" || sel.status === "proposed" || sel.status === "rejected") return;
@@ -574,20 +654,30 @@ function projectsView() {
 
 function projectView() {
   const p = proj();
-  const c = counts(p);
-  const badge = { selections: c.in_review + c.revise, samples: p.samples.length, documents: p.docs.length, quotes: p.quotes.filter(q => q.status === "Awaiting acceptance").length, messages: p.threads.length, team: p.team.length };
-  const rail = TABS.map(t => `<button data-act="tab" data-tab="${t}" ${S.tab === t ? 'aria-current="page"' : ""}>${TAB_LABEL[t]}${badge[t] ? `<span class="count">${badge[t]}</span>` : ""}</button>`).join("");
-  const body = { overview, selections, samples, documents, quotes, messages, team }[S.tab]();
+  if (!visibleTabs().includes(S.tab)) S.tab = "overview";
+  const c = counts(p), pp = planProgress(p);
+  const badge = { plan: pp.total ? Math.round(pp.done / pp.total * 100) + "%" : "", selections: c.in_review + c.revise, samples: p.samples.length, documents: p.docs.length, quotes: p.quotes.filter(q => q.status === "Awaiting acceptance").length, messages: p.threads.length, team: p.team.length };
+  const rail = visibleTabs().map(t => `${t === "internal" ? `<span class="rail-sep eyebrow">Staff only</span>` : ""}<button data-act="tab" data-tab="${t}" ${S.tab === t ? 'aria-current="page"' : ""}>${TAB_LABEL[t]}${badge[t] ? `<span class="count">${badge[t]}</span>` : ""}</button>`).join("");
+  const body = { overview, plan, selections, samples, documents, quotes, messages, team, internal, engagement }[S.tab]();
+  const mode = isStaff() ? `<div class="seg mode" role="group" aria-label="View mode">
+      <button data-act="preview" data-v="0" aria-pressed="${!S.preview}">Staff view</button><button data-act="preview" data-v="1" aria-pressed="${S.preview}">Client preview</button></div>` : "";
   return `<section class="proj-head" style="background:${p.band}"><div class="proj-head-in wrap">
-      <div class="crumbs"><button data-act="home">Projects</button><span aria-hidden="true">›</span><span class="url">/${p.slug}${S.tab === "overview" ? "" : "/" + S.tab}</span></div>
-      <h1>${esc(p.name)}</h1>
+      <div class="head-row">
+        <div class="crumbs"><button data-act="home">Projects</button><span aria-hidden="true">›</span><span class="url">/${p.slug}${S.tab === "overview" ? "" : "/" + S.tab}</span></div>
+        ${mode}
+      </div>
+      <div class="head-title">
+        <div class="marks" aria-hidden="true"><span class="mark ours"></span><span class="mark theirs">${esc(p.clientMark)}</span></div>
+        <h1>${esc(p.name)}</h1>
+      </div>
       <div class="facts"><span>${esc(p.brand)}</span><span>${esc(p.city)}</span><span>${p.keys} keys</span><span>${esc(p.stage)}</span><span>Opening ${esc(p.openingTarget)}</span></div>
     </div></section>
+    ${S.preview ? `<div class="preview-bar wrap">You're previewing this project as a client sees it. Internal tabs, steps and notes are hidden.</div>` : ""}
     <div class="work wrap"><nav class="rail" aria-label="Project sections">${rail}</nav><div class="content">${body}</div></div>`;
 }
 
 function overview() {
-  const p = proj(), c = counts(p), rep = USERS[p.rep];
+  const p = proj(), c = counts(p), rep = USERS[p.rep], pp = planProgress(p);
   const waiting = p.selections.filter(s => ["in_review", "revise"].includes(s.status) && isReviewer() && !s.reviews.some(r => r.user === me()));
   const open = p.selections.filter(s => ["in_review", "revise", "proposed"].includes(s.status));
   const list = isReviewer() ? waiting : open;
@@ -595,8 +685,16 @@ function overview() {
     return `<button class="todo" data-act="open-sel" data-id="${s.id}"><span class="mini-sw" style="${swatch(pr)}"></span>
       <span class="grow"><b>${esc(pr.name)}</b> <span class="muted">· ${esc(pr.colorway)}</span><br><span class="muted">${esc(a.name)}</span></span>${chip(s.status)}</button>`; }).join("");
   const feed = p.activity.map(a => `<div class="feed-item">${av(a.user)}<div><b>${esc(USERS[a.user].name)}</b> ${a.text}<br><span class="muted">${a.when}</span></div></div>`).join("");
-  const miles = p.milestones.map(m => `<div class="mile ${m.done ? "done" : ""}"><span class="mono">${esc(m.date)}</span><span>${esc(m.label)}</span></div>`).join("");
+  const next = p.plan.flatMap(visibleSteps).filter(k => !k.done).slice(0, 4).map(k => `<div class="mile"><span class="mono">${esc(k.date)}</span><span>${esc(k.t)}<br><span class="muted">${esc(USERS[k.owner].name)}</span> <span class="chip ${STEP_CLS[k.status]}">${k.status}</span></span></div>`).join("");
+  const ours = p.team.filter(m => USERS[m.user].staff), theirs = p.team.filter(m => !USERS[m.user].staff);
+  const person = m => `<div class="person">${av(m.user)}<div><b>${esc(USERS[m.user].name)}</b><br><span class="muted">${esc(USERS[m.user].title)}${USERS[m.user].staff ? "" : " · " + esc(USERS[m.user].org)}</span></div></div>`;
   return `
+    ${p.welcome ? `<div class="panel welcome">
+      <div class="welcome-rep">${av(p.rep)}<b>${esc(rep.name)}</b><span class="muted">${esc(rep.title)}</span>
+        <span class="mono muted" style="user-select:all">${esc(rep.email)}</span></div>
+      <div class="welcome-body"><p class="eyebrow">Welcome</p><p>${esc(p.welcome)}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tab" data-tab="messages">Reply to ${esc(rep.name.split(" ")[0])}</button><button class="btn ghost" data-act="copy" data-text="${esc(rep.phone)}">Copy phone ${esc(rep.phone)}</button></div></div>
+    </div>` : ""}
     <div class="panel">
       <div class="panel-pad sec-head"><div><p class="eyebrow">Decision tracker</p><h2>${p.selections.length} selections across ${p.areas.length} areas</h2></div>
         <button class="btn" data-act="tab" data-tab="selections">Open selections</button></div>
@@ -614,14 +712,10 @@ function overview() {
         <div class="panel"><div class="panel-pad"><h3>Recent activity</h3></div><div class="list">${feed || `<div class="empty">No activity yet.</div>`}</div></div>
       </div>
       <div style="display:grid;gap:20px;align-content:start;min-width:0">
-        <div class="panel panel-pad" style="display:grid;gap:12px">
-          <p class="eyebrow">Your project rep</p>
-          <div class="rep">${av(p.rep)}<div><b>${esc(rep.name)}</b><br><span class="muted">${esc(rep.title)}</span></div></div>
-          <div class="copyline"><span class="mono">${esc(rep.email)}</span><button class="btn ghost sm" data-act="copy" data-text="${esc(rep.email)}">Copy</button></div>
-          <div class="copyline"><span class="mono">${esc(rep.phone)}</span><button class="btn ghost sm" data-act="copy" data-text="${esc(rep.phone)}">Copy</button></div>
-          <button class="btn primary" data-act="tab" data-tab="messages">Message ${esc(rep.name.split(" ")[0])}</button>
-        </div>
-        <div class="panel"><div class="panel-pad"><h3>Milestones</h3></div><div class="miles">${miles}</div></div>
+        <div class="panel"><div class="panel-pad sec-head"><h3>Next steps</h3><button class="btn ghost sm" data-act="tab" data-tab="plan">Plan · ${pp.done}/${pp.total}</button></div><div class="miles">${next || `<div class="empty">All steps complete.</div>`}</div></div>
+        <div class="panel panel-pad stake"><h3>Stakeholders</h3>
+          <p class="eyebrow">Our team</p>${ours.map(person).join("")}
+          <p class="eyebrow">Project team</p>${theirs.map(person).join("")}</div>
       </div>
     </div>`;
 }
@@ -793,11 +887,11 @@ function messages() {
   const anchorName = id => { const s = p.selections.find(x => x.id === id); return s ? bySku(s.sku).name : ""; };
   const list = p.threads.map(th => `<button class="thread-btn" data-act="thread" data-id="${th.id}" aria-current="${th.id === S.thread}">
       <b>${esc(th.subject)}</b>${th.anchor ? `<span class="anchor">↳ ${esc(anchorName(th.anchor))}</span>` : ""}
-      <span class="muted" style="font-size:.8rem">${esc(USERS[th.msgs[th.msgs.length - 1].user].name)} · ${esc(th.msgs[th.msgs.length - 1].when)}</span></button>`).join("");
+      ${(m => `<span class="muted" style="font-size:.8rem">${esc(USERS[m.user].name)} · ${esc(m.when)}</span>`)(visibleMsgs(th)[visibleMsgs(th).length - 1])}</button>`).join("");
   const convo = t ? `<div class="convo-head"><h3>${esc(t.subject)}</h3>${t.anchor ? `<button class="btn ghost sm" style="justify-self:start" data-act="open-sel" data-id="${t.anchor}">↳ ${esc(anchorName(t.anchor))}</button>` : ""}</div>
-      <div class="msgs">${t.msgs.map(m => `<div class="msg ${USERS[m.user].staff ? "staff" : ""}">${av(m.user)}<div><div class="meta"><b>${esc(USERS[m.user].name)}</b>${USERS[m.user].staff ? `<span class="staff-tag">Staff</span>` : `<span>${esc(USERS[m.user].org)}</span>`}<span>${esc(m.when)}</span></div>
+      <div class="msgs">${visibleMsgs(t).map(m => `<div class="msg ${USERS[m.user].staff ? "staff" : ""} ${m.internal ? "internal" : ""}">${av(m.user)}<div><div class="meta"><b>${esc(USERS[m.user].name)}</b>${USERS[m.user].staff ? `<span class="staff-tag">Staff</span>` : `<span>${esc(USERS[m.user].org)}</span>`}<span>${esc(m.when)}</span>${m.internal ? `<span class="chip s-proposed">Internal note</span>` : ""}</div>
         <div class="bubble">${esc(m.body)}${m.file ? `<div><span class="attach">📎 ${esc(m.file)}</span></div>` : ""}</div></div></div>`).join("")}</div>
-      <form class="composer" data-form="reply"><label for="reply-body" class="eyebrow">Reply to everyone on this thread</label><textarea class="input" id="reply-body" placeholder="Write a message"></textarea>
+      <form class="composer" data-form="reply">${staffView() ? `<select class="input" id="reply-vis" style="max-width:280px" aria-label="Who sees this"><option value="public">Everyone on this project</option><option value="internal">Internal note (staff only)</option></select>` : `<label for="reply-body" class="eyebrow">Reply to everyone on this thread</label>`}<textarea class="input" id="reply-body" placeholder="Write a message"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><input type="file" id="reply-file" style="max-width:100%"><button class="btn primary" type="submit">Send</button></div></form>`
     : `<div class="convo-head"><h3>New thread</h3></div>
       <form class="composer" data-form="new-thread" style="border-top:0">
@@ -807,6 +901,62 @@ function messages() {
         <div><button class="btn primary" type="submit">Start thread</button></div></form><div></div>`;
   return `<div class="sec-head"><div><p class="eyebrow">Project conversations</p><h2>Messages</h2></div><button class="btn" data-act="thread" data-id="new">+ New thread</button></div>
     <div class="panel msg-layout"><div class="threads">${list || `<div class="empty">No threads yet.</div>`}</div><div class="convo">${convo}</div></div>`;
+}
+
+function plan() {
+  const p = proj(), pp = planProgress(p), pct = pp.total ? Math.round(pp.done / pp.total * 100) : 0;
+  const stages = p.plan.map(st => {
+    const steps = visibleSteps(st);
+    const rows = steps.map(k => `<div class="step ${k.done ? "done" : ""}">
+        <input type="checkbox" class="tick" id="step-${k.id}" data-step="${k.id}" ${k.done ? "checked" : ""} ${staffView() || k.owner === me() ? "" : "disabled"} aria-label="Mark done">
+        <label for="step-${k.id}" class="step-t">${esc(k.t)} ${k.internal ? `<span class="chip s-proposed">Internal</span>` : ""}</label>
+        <span class="chip ${k.done ? "s-approved" : STEP_CLS[k.status]}">${k.done ? "Done" : k.status}</span>
+        <span class="mono step-date">${esc(k.date)}</span>${av(k.owner)}</div>`).join("");
+    return `<div class="panel"><div class="panel-pad sec-head"><h3>${esc(st.name)}</h3><span class="mono muted">${steps.filter(k => k.done).length}/${steps.length}</span></div>
+      <div class="steps">${rows}</div>
+      ${staffView() ? `<form class="add-step" data-form="add-step" data-stage="${st.id}"><input class="input" id="new-step-${st.id}" placeholder="Add a step"><label class="inline"><input type="checkbox" id="new-int-${st.id}"> Internal</label><button class="btn sm" type="submit">Add</button></form>` : ""}</div>`;
+  }).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Shared action plan</p><h2>Plan</h2></div>
+      <div class="progress"><span class="num mono">${pct}%</span><div class="bar" style="width:180px"><i style="width:${pct}%;background:var(--accent)"></i></div>
+      ${staffView() ? `<button class="btn sm" data-act="toast" data-msg="Emails each assignee their open steps and due dates.">Notify assignees</button>` : ""}</div></div>
+    ${staffView() ? `<p class="note">Progress counts only steps the client can see. Internal steps stay with our team.</p>` : ""}
+    ${stages}`;
+}
+
+function internal() {
+  const p = proj();
+  if (!p.crm) return `<div class="sec-head"><h2>Internal</h2></div><div class="panel empty">No Salesforce opportunity linked yet.</div>`;
+  const crm = Object.entries(p.crm).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  const steps = p.plan.flatMap(st => st.steps.filter(k => k.internal)).map(k => `<div class="mile"><span class="mono">${esc(k.date)}</span><span>${esc(k.t)} <span class="muted">· ${esc(USERS[k.owner].name)}</span></span></div>`).join("");
+  const notes = p.threads.flatMap(t => t.msgs.filter(m => m.internal).map(m => `<div class="feed-item">${av(m.user)}<div><b>${esc(USERS[m.user].name)}</b> in <button class="linkish" data-act="goto-thread" data-id="${t.id}">${esc(t.subject)}</button><br>${esc(m.body)}</div></div>`)).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Staff only · never sent to clients</p><h2>Internal</h2></div></div>
+    <div class="ov-grid">
+      <div style="display:grid;gap:20px;align-content:start;min-width:0">
+        <form class="panel panel-pad" data-form="notes" style="display:grid;gap:10px"><h3>Handoff notes</h3>
+          <textarea class="input" id="internal-notes" style="min-height:140px">${esc(p.notes)}</textarea><div><button class="btn sm" type="submit">Save notes</button></div></form>
+        <div class="panel"><div class="panel-pad"><h3>Internal notes on threads</h3></div><div class="list">${notes || `<div class="empty">No internal notes.</div>`}</div></div>
+      </div>
+      <div style="display:grid;gap:20px;align-content:start;min-width:0">
+        <div class="panel panel-pad" style="display:grid;gap:10px"><div class="sec-head"><h3>Salesforce opportunity</h3><span class="muted" style="font-size:.78rem">Synced 12 min ago</span></div><dl class="kv">${crm}</dl></div>
+        <div class="panel"><div class="panel-pad"><h3>Internal steps</h3></div><div class="miles">${steps || `<div class="empty">None.</div>`}</div></div>
+      </div>
+    </div>`;
+}
+
+function engagement() {
+  const p = proj(), e = p.engagement;
+  if (!e) return `<div class="sec-head"><h2>Engagement</h2></div><div class="panel empty">No client visits yet. Engagement appears once invited people sign in.</div>`;
+  const max = Math.max(...e.tabs.map(t => t[1]));
+  const bars = e.tabs.map(([n, v]) => `<div class="hbar" title="${esc(n)}: ${v}% of time"><span>${esc(n)}</span><div class="track"><i style="width:${v / max * 100}%"></i></div><span class="num mono">${v}%</span></div>`).join("");
+  const people = e.people.map(([u, last, visits, time, act]) => `<tr><td><div class="doc-name">${av(u)}<div>${esc(USERS[u].name)}<br><span class="muted">${esc(USERS[u].org)}</span></div></div></td><td>${esc(last)}</td><td class="r">${visits}</td><td class="r">${esc(time)}</td><td>${esc(act)}</td></tr>`).join("");
+  const content = e.content.map(([n, v, d, l]) => `<tr><td>${esc(n)}</td><td class="r">${v}</td><td class="r">${d}</td><td>${esc(l)}</td></tr>`).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Staff only · last 30 days</p><h2>Engagement</h2></div><span class="chip s-approved">${esc(e.trend)}</span></div>
+    <div class="panel tally kpis num">${e.kpis.map(([k, v]) => `<div><b>${esc(v)}</b><span class="muted">${esc(k)}</span></div>`).join("")}</div>
+    <div class="ov-grid">
+      <div class="panel" style="min-width:0"><div class="panel-pad"><h3>Who's engaged</h3></div><div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Last visit</th><th class="r">Visits</th><th class="r">Time</th><th>Last action</th></tr></thead><tbody>${people}</tbody></table></div></div>
+      <div class="panel panel-pad" style="display:grid;gap:10px;align-content:start;min-width:0"><h3>Where time is spent</h3>${bars}</div>
+    </div>
+    <div class="panel"><div class="panel-pad"><h3>Most-viewed documents</h3></div><div class="tbl-wrap"><table><thead><tr><th>Document</th><th class="r">Views</th><th class="r">Downloads</th><th>Last viewed</th></tr></thead><tbody>${content}</tbody></table></div></div>`;
 }
 
 function team() {
@@ -843,6 +993,7 @@ $app.addEventListener("click", e => {
   const a = el.dataset.act, p = S.view === "project" ? proj() : null;
   switch (a) {
     case "login-staff": return go({ view: "projects", role: "rep" });
+    case "preview": return go({ preview: el.dataset.v === "1", sel: null });
     case "home": return go({ view: "projects", sel: null, modal: null });
     case "open-project": return go({ view: "project", pid: el.dataset.id, tab: "overview", sel: null, thread: (PROJECTS.find(x => x.id === el.dataset.id).threads[0] || {}).id || "new" });
     case "tab": return go({ tab: el.dataset.tab, sel: null, modal: null });
@@ -896,10 +1047,18 @@ $app.addEventListener("submit", e => {
       shipTo: document.getElementById("smp-ship").value || USERS[me()].org, by: me(), date: "Just now", status: "Requested" });
     S.sampleDraft = []; return toast("Sample request submitted. Your rep will confirm the ship date.");
   }
+  if (kind === "add-step") {
+    const st = p.plan.find(x => x.id === f.dataset.stage), t = document.getElementById("new-step-" + st.id).value.trim();
+    if (!t) return;
+    st.steps.push({ id: id("k"), t, owner: me(), date: "TBD", status: "Not started", internal: document.getElementById("new-int-" + st.id).checked });
+    return render();
+  }
+  if (kind === "notes") { p.notes = document.getElementById("internal-notes").value; return toast("Notes saved."); }
   if (kind === "reply") {
     const body = document.getElementById("reply-body").value.trim(); const file = document.getElementById("reply-file").files[0];
     if (!body && !file) return;
-    p.threads.find(x => x.id === S.thread).msgs.push({ user: me(), when: "Just now", body, file: file && file.name });
+    const vis = document.getElementById("reply-vis");
+    p.threads.find(x => x.id === S.thread).msgs.push({ user: me(), when: "Just now", body, file: file && file.name, internal: !!vis && vis.value === "internal" });
     return render();
   }
   if (kind === "new-thread") {
@@ -920,12 +1079,13 @@ $app.addEventListener("submit", e => {
 $app.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "role-switch") {
-    S.role = t.value; S.confirmQuote = null;
+    S.role = t.value; S.confirmQuote = null; S.preview = false;
     if (S.view === "project" && !isStaff() && !proj().team.some(m => m.user === me())) S.view = "projects";
     return render();
   }
   if (t.id === "staff-status") { const s = proj().selections.find(x => x.id === S.sel); s.status = t.value; return toast(`Status set to "${STATUS[t.value]}".`); }
   if (t.id === "add-area") { S.modal.area = t.value; return; }
+  if (t.dataset.step) { const k = proj().plan.flatMap(x => x.steps).find(x => x.id === t.dataset.step); k.done = t.checked; return render(); }
   if (t.id === "doc-upload") addFiles(t.files);
   if (t.name === "sample") S.sampleDraft = [...document.querySelectorAll("input[name=sample]:checked")].map(i => i.value);
 });
@@ -950,7 +1110,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && (S.sel || 
 /* Deep link: #selections etc. opens the sample project directly. */
 (function boot() {
   const h = (location.hash || "").slice(1);
-  if (TABS.includes(h)) Object.assign(S, { view: "project", tab: h });
+  if (TABS.includes(h)) Object.assign(S, { view: "project", tab: h }, STAFF_TABS.includes(h) ? { role: "rep" } : {});
   else if (h === "projects") S.view = "projects";
   render();
 })();
