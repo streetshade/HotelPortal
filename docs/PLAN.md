@@ -63,8 +63,8 @@ collaboration patterns this plan was missing:
 | Welcome card from the owner + Stakeholders (both sides) | **Adopt** on Overview. | 1 |
 | Dual logos + banner per room | **Adopt.** Our mark + client mark and a per-project colour and banner. | 1 |
 | Engagement analytics (visits, time per tab, most-viewed content, trend) | **Adopt, simplified.** Staff-only *Engagement* tab fed by an append-only event table. | 1 (events), 2 (dashboard) |
-| Notification matrix (Email / Slack / Teams) | **Adapt.** Email + **Microsoft Teams**, since we're on M365. A daily digest by default. | 2 |
-| Templates (room saved for reuse) | **Adapt** as *project templates*: areas, plan stages and welcome text per brand, so a brand's standard applies to every new property. | 2 |
+| Notification matrix (Email / Slack / Teams) | **Adapt.** Customers get **email** (immediate or daily digest). Staff get **Salesforce notifications** (bell + Salesforce mobile), with email as the fallback. No Slack or Teams. | 1 (email), 2 (Salesforce) |
+| Templates (room saved for reuse) | **Adapt** as *brand templates*: areas, plan stages, welcome text and pinned brand-standard documents. Launch set: **Best Western, Marriott, Global Hotel Alliance** (§6a). | 1 |
 | Content library (folders, labels, viewer) | **Adapt.** Back the company library with **SharePoint** via Microsoft Graph, since Marketing already keeps content there. Projects pin items from it. | 2 |
 | Deep-linkable panels (`?actionItemId=`, `?sectionId=`) | **Adopt** for selections, steps and threads. | 1 |
 | Share link access modes, anonymous visitor tracking | **Skip** (D9). | – |
@@ -176,9 +176,9 @@ later. The question is which cost we'd rather pay.
 | `Quote` | project, number, version, status, lines (sku, area, qty, unit, price), pdf, accepted_by/at |
 | `Thread` / `Message` | project, subject, optional anchor (selection, document, plan step or quote), body, attachments, **visibility** (`public`, `internal`) |
 | `PlanStage` / `PlanStep` | project, order, title, owner, start/due date, status (`not_started`, `on_track`, `at_risk`, `delayed`), done, **is_internal**, milestone flag |
-| `ProjectTemplate` | brand, default areas, plan stages, welcome text |
+| `BrandTemplate` | parent (e.g. Marriott), optional sub-brand, default areas + units, plan stages and steps (with internal flags and day offsets from the start date), welcome text, pinned library documents, version |
 | `Event` | append-only: project, user, type (visit, tab_view, doc_view, download, decision), subject, duration, ts. Rolled up nightly for Engagement. |
-| `NotificationPref` | user, event type, channel (email, Teams, digest) |
+| `NotificationPref` | user, event type, channel (`email_immediate`, `email_digest`, `salesforce`, `off`). Salesforce is offered only to staff with a linked Salesforce user id |
 | `Activity` | project, actor, verb, subject, for the project feed and audit |
 
 ## 6. Integrations
@@ -192,7 +192,26 @@ later. The question is which cost we'd rather pay.
 | Infor M3 13.4 | read | 3 | Order and shipment status per project, via the existing connector or ION API. |
 | SharePoint | read | 2 | **Company library** (spec sheets, EPDs, brand decks, case studies) read from a SharePoint document library via Graph; projects pin items. External users never need SharePoint access: the portal serves the files. |
 | SharePoint | write | 3 | Optional mirror of each project's uploaded files to a staff-side site. |
-| Microsoft Teams | write | 2 | Staff notifications (new decision, comment, sample request) to a channel or chat via Graph. |
+| Salesforce notifications | write | 2 | Staff alerts sent as **Salesforce Custom Notifications** (the `customNotificationAction` REST action): they appear in the bell and the Salesforce mobile app, and tapping one opens the linked Opportunity. Decisions, sample requests and quote acceptance are also logged as Activities on that Opportunity. Portal staff are matched to Salesforce users by Entra email. |
+
+## 6a. Brand templates
+
+A template seeds a new project so that every property of a brand starts from
+the same brand standards. It sets the areas, plan stages and steps, a welcome
+note and the pinned brand-standard documents. Staff pick one when they
+register a project, then edit freely. Changing the template later does not
+alter projects already created from it.
+
+| Template | Scope | Notes |
+|---|---|---|
+| **Marriott** | Parent template, with sub-brand variants added as needed (e.g. select-service vs. full-service) | Marriott's portfolio spans many brands with different finish standards. Start with one parent template and split by sub-brand when Marketing has the standards. |
+| **Best Western** | Parent template, with variants for the BWH tiers if needed | BWH brands share a lot of their standards, so one template may cover most properties. |
+| **Global Hotel Alliance** | Alliance template, with light defaults | GHA is an alliance of independent brands, so it has fewer common standards. Expect more project-level editing. |
+| Blank | – | For independents and one-offs. |
+
+Template contents come from Marketing's brand-standards material and are
+**not** invented by the portal. The prototype's template contents are
+placeholders.
 
 ## 7. Hosting (initial)
 
@@ -227,13 +246,14 @@ later. The question is which cost we'd rather pay.
 - Staff-only **Internal** tab (handoff notes, internal steps and notes)
 - Sample requests (email to the sample desk); quotes (staff upload PDF + lines)
 - Event capture for engagement (dashboard follows in phase 2)
-- Email notifications and daily digest
+- Email notifications (immediate or daily digest) for everyone
+- Brand templates: Best Western, Marriott, Global Hotel Alliance
 
 **Phase 2 — Connected**
 - Salesforce sync (Internal tab fields, activities); samples as Commerce
   orders → M3; quotes from source system
-- Engagement dashboard; Teams notifications and notification preferences
-- Project templates per brand; SharePoint-backed company library
+- Engagement dashboard; staff notifications in Salesforce
+- Template editor for Marketing (new brands and sub-brands); SharePoint-backed company library
 
 **Phase 3 — Operational**
 - M3 order and shipment tracking; SharePoint mirror; reporting for sales
@@ -257,9 +277,14 @@ later. The question is which cost we'd rather pay.
    (§4.3)? Should portal customers also be able to shop the store with the
    same login?
 6. ~~Reference screenshots~~: received (Aligned reference pack).
-7. **Migration:** how many active Aligned rooms need moving across, and is a
-   one-time import of plan steps, stakeholders and files wanted, or do we
-   start fresh per new project? Aligned's REST API returns rooms, tabs, plans
-   and resources as JSON, so an import is feasible.
-8. **Notifications:** is Teams the right staff channel (vs. email only)?
-9. **Brand templates:** which hotel brands would get a project template first?
+7. ~~Migration~~: none. The Aligned rooms were a trial only, so every project
+   starts fresh.
+8. ~~Notifications~~: email for everyone. Staff also get Salesforce
+   notifications (§6).
+9. ~~First brand templates~~: Best Western, Marriott, Global Hotel Alliance
+   (§6a).
+10. **Brand standards content:** who in Marketing owns each brand's standard
+    (finish schedules, approved product lists)? Do Marriott templates need to
+    split by sub-brand from day one?
+11. **Salesforce setup:** a Custom Notification Type and an integration user
+    for the portal's Connected App. Who administers the org?

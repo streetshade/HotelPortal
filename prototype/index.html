@@ -273,6 +273,13 @@ tfoot td { font-weight: 600; border-top: 1px solid var(--line); }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--ground); padding: .6rem 1rem; border-radius: 6px; z-index: 60; font-size: .88rem; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
 
+.avatar-btn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
+.modal.wide { width: min(680px, calc(100% - 32px)); }
+.tpl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tpl-grid label { align-items: flex-start; font-size: .9rem; font-weight: 400; color: var(--ink); }
+.tpl-preview { background: var(--sunk); border-radius: 8px; padding: 14px; display: grid; gap: 8px; }
+.tpl-preview ul { margin: .3rem 0 0; padding-left: 1.1rem; }
+@media (max-width: 700px) { .tpl-grid { grid-template-columns: minmax(0, 1fr); } }
 /* Aligned-derived patterns: dual marks, preview mode, plan, welcome, internal, engagement */
 .head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; }
 .head-title { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -418,7 +425,7 @@ const id = p => p + (++seq);
 
 const PROJECTS = [
   {
-    id: "p1", slug: "harbor-pine-austin", name: "Harbor & Pine Hotel · Austin Downtown", brand: "Harbor & Pine Hotels", city: "Austin, TX",
+    id: "p1", oppId: "006X0", slug: "harbor-pine-austin", name: "Harbor & Pine Hotel · Austin Downtown", brand: "Harbor & Pine Hotels", city: "Austin, TX",
     keys: 212, stage: "Design Development", openingTarget: "Q4 2027", band: "#1F3F52", rep: "dana",
     areas: [
       { id: "a1", name: "Guest Rooms", qty: "5,900 SY" },
@@ -554,11 +561,37 @@ const PROJECTS = [
   }
 ];
 
+/* Brand templates seed areas, plan and welcome. Contents here are placeholders; real ones come from Marketing's brand standards. */
+const TEMPLATES = {
+  marriott: { name: "Marriott", scope: "Parent template · sub-brand variants later",
+    areas: [["Guest Rooms", "SY"], ["Guestroom Corridors", "SY"], ["Lobby & Public Areas", "SF"], ["Meeting & Ballroom", "SY"], ["Fitness Center", "SF"]],
+    plan: [["Design development", ["Brand standards review", "Hand samples to the design team", "Brand design approval"]],
+           ["Submittals & pricing", ["Submittal package approval", "Accept quote", "Credit application and PO"]],
+           ["Production & install", ["Release to production", "Install start"]]] },
+  bestwestern: { name: "Best Western", scope: "Parent template · BWH tiers share most standards",
+    areas: [["Guest Rooms", "SY"], ["Corridors", "SY"], ["Lobby & Breakfast Area", "SF"], ["Fitness Center", "SF"]],
+    plan: [["Design development", ["BWH design review", "Hand samples to the owner", "Finish selections sign-off"]],
+           ["Submittals & pricing", ["Submittal approval", "Accept quote", "PO"]],
+           ["Production & install", ["Release to production", "Install start"]]] },
+  gha: { name: "Global Hotel Alliance", scope: "Alliance template · light defaults, edit per member brand",
+    areas: [["Guest Rooms", "SY"], ["Corridors", "SY"], ["Public Areas", "SF"]],
+    plan: [["Concept", ["Concept presentation", "Design direction agreed"]],
+           ["Selections & submittals", ["Finish selections sign-off", "Submittal approval", "Accept quote"]],
+           ["Production & install", ["Release to production", "Install start"]]] },
+  blank: { name: "Blank", scope: "Independents and one-offs", areas: [["Guest Rooms", "SY"]], plan: [["Getting started", ["Kick-off call"]]] }
+};
+const OPPS = [
+  { id: "006A1", name: "Riverside Hotel Tampa · Flooring", account: "Bayline Hospitality Group", city: "Tampa, FL", keys: 164, amount: "$286,000" },
+  { id: "006A2", name: "Lakeview Inn Boise · Renovation", account: "Summit Peak Owners LLC", city: "Boise, ID", keys: 98, amount: "$142,500" },
+  { id: "006A3", name: "Harborfront Suites Portland · Flooring", account: "Cascade Lodging Partners", city: "Portland, ME", keys: 121, amount: "$198,000" }
+];
+const NOTIFY_EVENTS = ["Decision on a selection", "New message or reply", "Sample request update", "Quote posted or accepted", "Plan step assigned or due"];
+
 /* ---------- State ---------- */
 const TABS = ["overview", "plan", "selections", "samples", "documents", "quotes", "messages", "team", "internal", "engagement"];
 const STAFF_TABS = ["internal", "engagement"];
 const TAB_LABEL = { overview: "Overview", plan: "Plan", selections: "Selections", samples: "Samples", documents: "Documents", quotes: "Quotes", messages: "Messages", team: "Team", internal: "Internal", engagement: "Engagement" };
-const S = { view: "login", role: "brand", pid: "p1", tab: "overview", sel: null, modal: null, preview: false,
+const S = { view: "login", role: "brand", pid: "p1", tab: "overview", sel: null, modal: null, preview: false, prefs: {},
   f: { status: "all", q: "" }, docCat: "All", thread: "t1", sampleDraft: [], confirmQuote: null, toast: null };
 
 const $app = document.getElementById("app");
@@ -610,7 +643,7 @@ function topbar() {
     <span class="spacer"></span>
     <label class="viewas"><span class="muted">Viewing as</span>
       <select class="input" id="role-switch" aria-label="Viewing as">${opts}</select></label>
-    ${av(me())}
+    <button class="avatar-btn" data-act="notify" aria-label="Notification settings" title="Notification settings">${av(me())}</button>
   </div></header>`;
 }
 
@@ -647,7 +680,7 @@ function projectsView() {
   }).join("");
   return `<main class="page wrap">
     <div class="sec-head"><div><p class="eyebrow">${isStaff() ? "Assigned to you" : esc(USERS[me()].org)}</p><h1>Projects</h1></div>
-      ${isStaff() ? `<button class="btn" data-act="toast" data-msg="In the real build, projects are created from the Salesforce opportunity.">+ Register project</button>` : ""}</div>
+      ${isStaff() ? `<button class="btn primary" data-act="register">+ Register project</button>` : ""}</div>
     ${mine.length ? `<div class="proj-grid">${cards}</div>` : `<div class="panel empty">You haven't been added to a project yet.</div>`}
   </main>`;
 }
@@ -801,6 +834,36 @@ function drawer() {
       <div><h3 style="margin-bottom:.4rem">Documents</h3>${docs.length ? docs.map(d => `<div class="cat-row"><span class="ftype">PDF</span><span class="grow">${esc(d.name)}<br><span class="muted mono">${esc(d.ver)} · ${esc(d.size)}</span></span><button class="btn sm" data-act="toast" data-msg="Downloads use short-lived signed links in the real build.">Download</button></div>`).join("") : `<p class="muted">No product documents attached yet.</p>`}</div>
     </div>
   </aside>`;
+}
+
+function registerModal() {
+  const m = S.modal, t = TEMPLATES[m.tpl], o = OPPS.find(x => x.id === m.opp);
+  const taken = new Set(PROJECTS.map(p => p.oppId));
+  const oppOpts = OPPS.map(x => `<option value="${x.id}" ${x.id === m.opp ? "selected" : ""} ${taken.has(x.id) ? "disabled" : ""}>${esc(x.name)}${taken.has(x.id) ? " (registered)" : ""}</option>`).join("");
+  const tplOpts = Object.entries(TEMPLATES).map(([k, v]) => `<label><input type="radio" name="tpl" value="${k}" ${k === m.tpl ? "checked" : ""}><span><b>${esc(v.name)}</b><br><span class="muted" style="font-size:.8rem">${esc(v.scope)}</span></span></label>`).join("");
+  return `<div class="scrim" data-act="close"></div><form class="modal wide" role="dialog" aria-modal="true" aria-label="Register project" data-form="register">
+    <div class="sec-head"><div><p class="eyebrow">New project</p><h2>Register project</h2></div><button class="btn ghost" type="button" data-act="close">Close</button></div>
+    <div class="field"><label for="reg-opp">Salesforce opportunity</label><select class="input" id="reg-opp">${oppOpts}</select>
+      <span class="muted" style="font-size:.8rem">${esc(o.account)} · ${esc(o.city)} · ${o.keys} keys · ${esc(o.amount)}</span></div>
+    <div class="field"><label>Brand template</label><div class="checks tpl-grid">${tplOpts}</div></div>
+    <div class="tpl-preview"><p class="eyebrow">This template sets up</p>
+      <div class="form-grid"><div><b>Areas</b><ul>${t.areas.map(a => `<li>${esc(a[0])} <span class="mono muted">${a[1]}</span></li>`).join("")}</ul></div>
+      <div><b>Plan</b><ul>${t.plan.map(st => `<li>${esc(st[0])} <span class="muted">· ${st[1].length} steps</span></li>`).join("")}</ul></div></div>
+      <p class="muted" style="font-size:.8rem">Placeholder contents. Real templates come from Marketing's brand standards.</p></div>
+    <div><button class="btn primary" type="submit">Create project</button></div>
+  </form>`;
+}
+
+function notifyModal() {
+  const staff = isStaff(), prefs = S.prefs[S.role] || (S.prefs[S.role] = {});
+  const opts = staff ? [["salesforce", "Salesforce"], ["email_immediate", "Email"], ["email_digest", "Daily digest"], ["off", "Off"]]
+                     : [["email_immediate", "Email"], ["email_digest", "Daily digest"], ["off", "Off"]];
+  const rows = NOTIFY_EVENTS.map((ev, i) => `<tr><td>${esc(ev)}</td><td><select class="input" id="pref-${i}" data-pref="${i}" aria-label="${esc(ev)}">${opts.map(([k, l]) => `<option value="${k}" ${(prefs[i] || opts[0][0]) === k ? "selected" : ""}>${l}</option>`).join("")}</select></td></tr>`).join("");
+  return `<div class="scrim" data-act="close"></div><div class="modal" role="dialog" aria-modal="true" aria-label="Notification settings">
+    <div class="sec-head"><div><p class="eyebrow">${esc(USERS[me()].name)}</p><h2>Notifications</h2></div><button class="btn ghost" data-act="close">Close</button></div>
+    <p class="note">${staff ? "Salesforce notifications appear in your bell and the Salesforce mobile app and open the linked opportunity. Email is used if you have no Salesforce user." : "We email you at your sign-in address. Choose a daily digest to get one summary each morning."}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>When</th><th>Send to</th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
 }
 
 function addModal() {
@@ -979,7 +1042,9 @@ function team() {
 /* ---------- Render + events ---------- */
 function render() {
   const main = S.view === "login" ? loginView() : S.view === "projects" ? projectsView() : projectView();
-  const overlay = S.view === "project" && S.modal ? addModal() : S.view === "project" && S.sel ? drawer() : "";
+  const mk = S.modal && S.modal.kind;
+  const overlay = mk === "register" ? registerModal() : mk === "notify" ? notifyModal()
+    : S.view === "project" && S.modal ? addModal() : S.view === "project" && S.sel ? drawer() : "";
   const active = document.activeElement && document.activeElement.id;
   const caret = active && document.activeElement.selectionStart;
   $app.innerHTML = (S.view === "login" ? "" : topbar()) + main + overlay + (S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : "");
@@ -999,6 +1064,8 @@ $app.addEventListener("click", e => {
     case "tab": return go({ tab: el.dataset.tab, sel: null, modal: null });
     case "open-sel": return go({ sel: el.dataset.id, modal: null });
     case "close": return go({ sel: null, modal: null });
+    case "register": { const taken = new Set(PROJECTS.map(p => p.oppId)); return go({ modal: { kind: "register", opp: (OPPS.find(o => !taken.has(o.id)) || OPPS[0]).id, tpl: "marriott" } }); }
+    case "notify": return go({ modal: { kind: "notify" }, sel: null });
     case "filter": S.f.status = el.dataset.v; return render();
     case "doccat": S.docCat = el.dataset.v; return render();
     case "thread": S.ntSubject = ""; S.ntAnchor = ""; return go({ thread: el.dataset.id });
@@ -1028,6 +1095,22 @@ $app.addEventListener("submit", e => {
   e.preventDefault();
   const p = S.view === "project" ? proj() : null, kind = f.dataset.form;
   if (kind === "login") return go({ view: "projects", role: "brand" });
+  if (kind === "register") {
+    const o = OPPS.find(x => x.id === S.modal.opp), t = TEMPLATES[S.modal.tpl];
+    if (PROJECTS.some(x => x.oppId === o.id)) return toast("That opportunity already has a project.");
+    const name = o.name.split(" · ")[0], slug = name.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const np = { id: id("p"), oppId: o.id, slug, name, brand: t.name === "Blank" ? o.account : t.name, city: o.city, keys: o.keys,
+      stage: "Schematic Design", openingTarget: "TBD", band: "#2F4858", rep: me(), clientMark: name.split(" ").map(w => w[0]).join("").slice(0, 3),
+      areas: t.areas.map(a => ({ id: id("a"), name: a[0], qty: "— " + a[1] })), selections: [], samples: [], docs: [], quotes: [], threads: [],
+      team: [{ user: me(), role: "Sales rep", status: "Active" }],
+      plan: t.plan.map(st => ({ id: id("g"), name: st[0], steps: st[1].map(x => ({ id: id("k"), t: x, owner: me(), date: "TBD", status: "Not started" })) })),
+      welcome: `Welcome to the ${name} flooring workspace. Selections, samples, documents, quotes and our shared plan will all live here.`,
+      crm: { Opportunity: o.name, Account: o.account, Amount: o.amount, Stage: "Qualification" }, notes: "",
+      activity: [{ user: me(), text: `created the project from the <b>${esc(t.name)}</b> template`, when: "Just now" }] };
+    PROJECTS.unshift(np);
+    S.modal = null; go({ view: "project", pid: np.id, tab: "overview", thread: "new" });
+    return toast(`${np.name} created from the ${t.name} template. Next: invite the client team.`);
+  }
   if (kind === "decide") {
     const decision = (e.submitter && e.submitter.dataset.decision) || "approve";
     const comment = document.getElementById("decide-comment").value.trim();
@@ -1085,6 +1168,9 @@ $app.addEventListener("change", e => {
   }
   if (t.id === "staff-status") { const s = proj().selections.find(x => x.id === S.sel); s.status = t.value; return toast(`Status set to "${STATUS[t.value]}".`); }
   if (t.id === "add-area") { S.modal.area = t.value; return; }
+  if (t.id === "reg-opp") { S.modal.opp = t.value; return render(); }
+  if (t.name === "tpl") { S.modal.tpl = t.value; return render(); }
+  if (t.dataset.pref) { S.prefs[S.role][t.dataset.pref] = t.value; return toast("Notification setting saved."); }
   if (t.dataset.step) { const k = proj().plan.flatMap(x => x.steps).find(x => x.id === t.dataset.step); k.done = t.checked; return render(); }
   if (t.id === "doc-upload") addFiles(t.files);
   if (t.name === "sample") S.sampleDraft = [...document.querySelectorAll("input[name=sample]:checked")].map(i => i.value);
