@@ -1,0 +1,957 @@
+<title>Selections Portal Prototype</title>
+<meta name="description" content="Clickable prototype of a hospitality project selections portal: micro-catalog, reviews, samples, documents, quotes and messages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky top bar; project workspace = left section rail + content; product detail opens in a right-hand drawer. */
+:root {
+  --ground: #F3F4F1;
+  --surface: #FFFFFF;
+  --sunk: #ECEEEA;
+  --ink: #1B2320;
+  --muted: #5B6862;
+  --line: #D9DED9;
+  --accent: #22594F;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E1ECE8;
+  --brass: #8C6A2A;
+  --st-approved: #2A7049;  --st-approved-bg: #E2F0E7;
+  --st-review: #8F5B06;    --st-review-bg: #F7ECD6;
+  --st-revise: #A53D28;    --st-revise-bg: #F7E3DE;
+  --st-proposed: #3F5B7C;  --st-proposed-bg: #E3EAF2;
+  --st-muted: #5B6862;     --st-muted-bg: #E7EAE6;
+  --shadow: 0 1px 2px rgba(20,30,25,.06), 0 8px 28px rgba(20,30,25,.08);
+  --scrim: rgba(18,24,21,.42);
+  --f-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #131715; --surface: #1B201D; --sunk: #171B19; --ink: #E6EBE8; --muted: #9AA7A0; --line: #2C3430;
+    --accent: #72B8A8; --accent-ink: #0E1513; --accent-soft: #1E302B; --brass: #D2AA5E;
+    --st-approved: #7BC99A; --st-approved-bg: #19301F;
+    --st-review: #E2B45C;   --st-review-bg: #33280F;
+    --st-revise: #EE8C74;   --st-revise-bg: #3A1D16;
+    --st-proposed: #8FB0D6; --st-proposed-bg: #1B2736;
+    --st-muted: #9AA7A0;    --st-muted-bg: #242B27;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.35);
+    --scrim: rgba(0,0,0,.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #131715; --surface: #1B201D; --sunk: #171B19; --ink: #E6EBE8; --muted: #9AA7A0; --line: #2C3430;
+  --accent: #72B8A8; --accent-ink: #0E1513; --accent-soft: #1E302B; --brass: #D2AA5E;
+  --st-approved: #7BC99A; --st-approved-bg: #19301F;
+  --st-review: #E2B45C;   --st-review-bg: #33280F;
+  --st-revise: #EE8C74;   --st-revise-bg: #3A1D16;
+  --st-proposed: #8FB0D6; --st-proposed-bg: #1B2736;
+  --st-muted: #9AA7A0;    --st-muted-bg: #242B27;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.35);
+  --scrim: rgba(0,0,0,.55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; letter-spacing: -.01em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem); line-height: 1.1; }
+h2 { font-size: 1.3rem; line-height: 1.2; }
+h3 { font-size: 1.02rem; line-height: 1.3; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--f-mono); font-size: .86em; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { padding-inline: clamp(16px, 3vw, 32px); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--line); background: var(--surface); padding: .5rem .85rem; border-radius: var(--r); cursor: pointer; font-weight: 500; white-space: nowrap; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); background: var(--sunk); }
+.btn.sm { padding: .3rem .6rem; font-size: .85rem; }
+.btn.ok { color: var(--st-approved); border-color: var(--st-approved); }
+.btn.warn { color: var(--st-revise); border-color: var(--st-revise); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+.field { display: grid; gap: .3rem; }
+.field label { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.input, select.input, textarea.input { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: .55rem .7rem; }
+textarea.input { min-height: 84px; resize: vertical; }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Status chips */
+.chip { display: inline-flex; align-items: center; gap: .35rem; font-size: .75rem; font-weight: 600; padding: .18rem .55rem; border-radius: 999px; white-space: nowrap; }
+.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.s-approved { color: var(--st-approved); background: var(--st-approved-bg); }
+.s-in_review { color: var(--st-review); background: var(--st-review-bg); }
+.s-revise, .s-rejected { color: var(--st-revise); background: var(--st-revise-bg); }
+.s-proposed { color: var(--st-proposed); background: var(--st-proposed-bg); }
+.s-alternate, .s-muted { color: var(--st-muted); background: var(--st-muted-bg); }
+
+/* Top bar */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar-in { display: flex; align-items: center; gap: 1rem; min-height: 56px; flex-wrap: wrap; padding-block: .4rem; }
+.brand { display: flex; align-items: center; gap: .6rem; font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; background: none; border: 0; cursor: pointer; padding: 0; }
+.brand-mark { width: 26px; height: 26px; border-radius: 4px; background:
+  repeating-linear-gradient(45deg, var(--accent) 0 3px, transparent 3px 6px), var(--accent-soft); border: 1px solid var(--accent); }
+.topbar .spacer { flex: 1; }
+.viewas { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
+.viewas select { max-width: 260px; padding: .35rem .5rem; }
+.proto-tag { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--brass); border: 1px dashed var(--brass); border-radius: 4px; padding: .1rem .4rem; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 600; background: var(--accent-soft); color: var(--accent); flex: none; }
+
+/* Login */
+.login { min-height: calc(100vh - 40px); display: grid; place-items: center; padding-block: 40px; }
+.login-card { width: min(920px, 100%); display: grid; grid-template-columns: 1.1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.login-art { min-height: 360px; position: relative; background-color: #3B4A44; background-image:
+  radial-gradient(circle at 25% 25%, #C9B48A 0 14%, transparent 15%), radial-gradient(circle at 75% 75%, #8FA79C 0 10%, transparent 11%),
+  linear-gradient(90deg, transparent 48%, #2C3833 48% 52%, transparent 52%), linear-gradient(0deg, transparent 48%, #2C3833 48% 52%, transparent 52%);
+  background-size: 64px 64px; }
+.login-art .cap { position: absolute; left: 20px; bottom: 20px; right: 20px; color: #F4F1E8; background: rgba(20,26,23,.72); padding: 14px 16px; border-radius: 6px; font-size: .85rem; }
+.login-art .cap b { font-family: var(--f-display); font-size: 1.05rem; display: block; }
+.login-form { padding: clamp(24px, 4vw, 40px); display: grid; gap: 1.1rem; align-content: center; }
+.divider { display: flex; align-items: center; gap: .75rem; color: var(--muted); font-size: .78rem; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.ms-btn { justify-content: center; width: 100%; }
+.ms-logo { width: 16px; height: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.ms-logo i { background: var(--muted); }
+.note { font-size: .8rem; color: var(--muted); background: var(--sunk); border-radius: var(--r); padding: .6rem .75rem; }
+
+/* Projects list */
+.page { padding-block: 28px 64px; display: grid; gap: 24px; max-width: 1280px; margin-inline: auto; }
+.proj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.proj-card { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: pointer; padding: 0; display: grid; }
+.proj-card:hover { border-color: var(--muted); }
+.proj-band { height: 84px; position: relative; }
+.proj-band .keys { position: absolute; right: 12px; bottom: 10px; color: #fff; font-family: var(--f-mono); font-size: .75rem; background: rgba(0,0,0,.35); padding: .1rem .4rem; border-radius: 3px; }
+.proj-body { padding: 14px 16px 16px; display: grid; gap: .5rem; }
+.proj-meta { display: flex; flex-wrap: wrap; gap: .35rem 1rem; font-size: .8rem; color: var(--muted); }
+.bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; }
+
+/* Project workspace */
+.proj-head { color: #fff; }
+.proj-head-in { padding-block: 22px 18px; display: grid; gap: .5rem; max-width: 1280px; margin-inline: auto; }
+.proj-head .crumbs { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; font-size: .8rem; opacity: .9; }
+.proj-head .crumbs button { background: none; border: 0; color: inherit; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.url { font-family: var(--f-mono); font-size: .78rem; background: rgba(0,0,0,.28); padding: .15rem .5rem; border-radius: 4px; overflow-wrap: anywhere; }
+.proj-head .facts { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; font-size: .85rem; opacity: .92; }
+.work { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; padding-block: 24px 64px; max-width: 1280px; margin-inline: auto; }
+.rail { display: grid; gap: 2px; align-content: start; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); }
+.rail button { display: flex; justify-content: space-between; align-items: center; text-align: left; background: none; border: 0; padding: .55rem .7rem; border-radius: var(--r); cursor: pointer; color: var(--muted); font-weight: 500; }
+.rail button:hover { background: var(--sunk); color: var(--ink); }
+.rail button[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: inset 3px 0 0 var(--accent); }
+.rail .count { font-size: .72rem; font-family: var(--f-mono); color: var(--muted); }
+.content { display: grid; gap: 20px; align-content: start; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .75rem; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.panel-pad { padding: 18px; }
+
+/* Overview */
+.ov-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
+.tally { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.tally div { padding: 14px 18px; border-right: 1px solid var(--line); display: grid; gap: .1rem; }
+.tally div:last-child { border-right: 0; }
+.tally b { font-family: var(--f-display); font-size: 1.7rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.list { display: grid; }
+.list > * { padding: 12px 18px; border-top: 1px solid var(--line); }
+.list > *:first-child { border-top: 0; }
+.todo { display: flex; align-items: center; gap: 12px; background: none; border: 0; border-top: 1px solid var(--line); width: 100%; text-align: left; cursor: pointer; }
+.todo:hover { background: var(--sunk); }
+.todo .grow { flex: 1; min-width: 0; }
+.mini-sw { width: 40px; height: 40px; border-radius: 4px; flex: none; border: 1px solid var(--line); }
+.rep { display: flex; gap: 14px; align-items: center; }
+.rep .avatar { width: 48px; height: 48px; font-size: 1rem; }
+.copyline { display: flex; align-items: center; gap: .4rem; font-size: .85rem; }
+.copyline span { user-select: all; }
+.feed-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; font-size: .88rem; }
+.feed-item .avatar { width: 26px; height: 26px; font-size: .65rem; }
+.miles { display: grid; }
+.mile { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; padding: 10px 18px; border-top: 1px solid var(--line); font-size: .88rem; }
+.mile:first-child { border-top: 0; }
+.mile.done { color: var(--muted); }
+.mile.done span:last-child { text-decoration: line-through; }
+
+/* Selections micro-catalog */
+.toolbar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--sunk); padding: 3px; border-radius: 8px; }
+.seg button { border: 0; background: none; padding: .3rem .65rem; border-radius: 6px; cursor: pointer; font-size: .82rem; color: var(--muted); font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.search { flex: 1; min-width: 180px; max-width: 280px; }
+.area-block { display: grid; gap: 12px; }
+.area-head { display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; cursor: pointer; text-align: left; padding: 0; }
+.card:hover { border-color: var(--muted); box-shadow: var(--shadow); }
+.card .sw { aspect-ratio: 16 / 10; max-width: 100%; position: relative; }
+.card .sw .chip { position: absolute; left: 10px; top: 10px; }
+.card-body { padding: 12px 14px 14px; display: grid; gap: .35rem; align-content: start; }
+.card-foot { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+.votes { display: inline-flex; gap: 3px; }
+.votes i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.votes i.approve { background: var(--st-approved); }
+.votes i.revise, .votes i.reject { background: var(--st-revise); }
+.empty { padding: 32px 18px; text-align: center; color: var(--muted); display: grid; gap: .5rem; justify-items: center; }
+
+/* Drawer + modal */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(580px, 100%); background: var(--surface); z-index: 41; overflow-y: auto; box-shadow: var(--shadow); display: grid; align-content: start; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer .sw { height: 190px; position: relative; }
+.drawer .close { position: absolute; right: 12px; top: 12px; background: rgba(0,0,0,.5); color: #fff; border: 0; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; }
+.drawer-body { padding: 18px 22px 28px; display: grid; gap: 20px; }
+.kv { display: grid; grid-template-columns: minmax(120px, 40%) minmax(0, 1fr); border-top: 1px solid var(--line); font-size: .86rem; }
+.kv > * { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+.review { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.review .who { display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: center; }
+.decide { display: grid; gap: 10px; background: var(--sunk); border-radius: 8px; padding: 14px; }
+.decide .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.modal { position: fixed; z-index: 41; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 32px)); max-height: calc(100% - 48px); overflow-y: auto; background: var(--surface); border-radius: 10px; box-shadow: var(--shadow); padding: 22px; display: grid; gap: 14px; }
+.cat-row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.cat-row .grow { flex: 1; min-width: 0; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+th { text-align: left; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+tfoot td { font-weight: 600; border-top: 1px solid var(--line); }
+
+/* Samples form */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.form-grid .full { grid-column: 1 / -1; }
+.checks { display: grid; gap: 6px; }
+.checks label { display: flex; align-items: center; gap: .6rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
+.checks label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Documents */
+.drop { border: 1.5px dashed var(--line); border-radius: 8px; padding: 18px; text-align: center; color: var(--muted); display: grid; gap: .4rem; justify-items: center; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.ftype { display: inline-grid; place-items: center; width: 34px; height: 40px; border-radius: 3px; font-family: var(--f-mono); font-size: .62rem; font-weight: 500; background: var(--sunk); border: 1px solid var(--line); color: var(--muted); flex: none; }
+.doc-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.doc-name div { min-width: 0; overflow-wrap: anywhere; }
+
+/* Quotes */
+.quote-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 18px; border-bottom: 1px solid var(--line); }
+.confirm { background: var(--sunk); border-radius: 8px; padding: 14px; display: grid; gap: 10px; margin: 0 18px 18px; }
+
+/* Messages */
+.msg-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 520px; }
+.threads { border-right: 1px solid var(--line); display: grid; align-content: start; }
+.thread-btn { text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 12px 14px; cursor: pointer; display: grid; gap: .2rem; }
+.thread-btn:hover { background: var(--sunk); }
+.thread-btn[aria-current="true"] { background: var(--accent-soft); }
+.thread-btn .anchor { font-size: .74rem; color: var(--accent); }
+.convo { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+.convo-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: grid; gap: .2rem; }
+.msgs { padding: 16px 18px; display: grid; gap: 14px; align-content: start; }
+.msg { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.msg .bubble { background: var(--sunk); border-radius: 0 8px 8px 8px; padding: 10px 12px; }
+.msg.staff .bubble { background: var(--accent-soft); }
+.msg .meta { display: flex; flex-wrap: wrap; gap: .5rem; font-size: .78rem; color: var(--muted); margin-bottom: .2rem; }
+.msg .meta b { color: var(--ink); }
+.attach { display: inline-flex; align-items: center; gap: .4rem; margin-top: .4rem; font-size: .8rem; font-family: var(--f-mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: .15rem .45rem; }
+.composer { border-top: 1px solid var(--line); padding: 12px 18px; display: grid; gap: 8px; }
+.staff-tag { font-size: .66rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+
+/* Team */
+.team-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--ground); padding: .6rem 1rem; border-radius: 6px; z-index: 60; font-size: .88rem; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+
+@media (max-width: 900px) {
+  .work { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .rail { position: static; display: flex; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
+  .rail button { flex: none; }
+  .rail button[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--accent); }
+  .ov-grid { grid-template-columns: minmax(0, 1fr); }
+  .msg-layout { grid-template-columns: minmax(0, 1fr); }
+  .threads { border-right: 0; border-bottom: 1px solid var(--line); max-height: 220px; overflow-y: auto; }
+}
+@media (max-width: 700px) {
+  .login-card { grid-template-columns: minmax(0, 1fr); }
+  .login-art { min-height: 200px; }
+  .tally { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tally div:nth-child(2) { border-right: 0; }
+  .tally div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .viewas span { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .drawer { animation: slide .18s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<div id="app"></div>
+
+<script>
+/* ---------- Mock data (would come from the portal DB + Commerce catalog) ---------- */
+const USERS = {
+  dana:   { name: "Dana Whitfield", title: "Project Sales Manager, Southwest", org: "Project Sales", staff: true, email: "dana.whitfield@yourcompany.com", phone: "(512) 555-0148" },
+  kate:   { name: "Kate Liu", title: "Specification Support", org: "Marketing", staff: true },
+  priya:  { name: "Priya Raman", title: "Brand Design Manager", org: "Harbor & Pine Hotels", staff: false },
+  marco:  { name: "Marco Ellison", title: "Senior Interior Designer", org: "Studio Kessel Architecture", staff: false },
+  jordan: { name: "Jordan Ames", title: "Development Project Manager", org: "Brightline Development", staff: false },
+  sam:    { name: "Sam Okafor", title: "Project Engineer", org: "Northgate Builders (GC)", staff: false }
+};
+const ROLES = {
+  rep:       { user: "dana",   label: "Dana Whitfield · Sales rep (staff)" },
+  brand:     { user: "priya",  label: "Priya Raman · Brand (customer admin)" },
+  architect: { user: "marco",  label: "Marco Ellison · Architect" },
+  developer: { user: "jordan", label: "Jordan Ames · Developer" }
+};
+const REVIEWERS = ["priya", "marco", "jordan"];
+
+const STATUS = {
+  proposed:  "Proposed",
+  in_review: "In review",
+  revise:    "Revision requested",
+  approved:  "Approved",
+  rejected:  "Rejected",
+  alternate: "Alternate"
+};
+
+/* Swatches drawn in CSS so the prototype is self-contained. Real build uses Commerce product media. */
+function swatch(p) {
+  const [a, b, c] = p.colors;
+  const pats = {
+    loop: `background-color:${a};background-image:repeating-linear-gradient(45deg,${b} 0 2px,transparent 2px 7px),repeating-linear-gradient(-45deg,${c} 0 1px,transparent 1px 9px)`,
+    axminster: `background-color:${a};background-image:radial-gradient(circle at 25% 25%,${b} 0 16%,transparent 17%),radial-gradient(circle at 75% 75%,${c} 0 11%,transparent 12%),linear-gradient(90deg,transparent 47%,${b} 47% 53%,transparent 53%),linear-gradient(0deg,transparent 47%,${c} 47% 53%,transparent 53%);background-size:52px 52px`,
+    tile: `background-color:${a};background-image:linear-gradient(90deg,rgba(0,0,0,.18) 1px,transparent 1px),linear-gradient(0deg,rgba(0,0,0,.18) 1px,transparent 1px),repeating-linear-gradient(0deg,${b} 0 2px,transparent 2px 6px);background-size:64px 64px,64px 64px,auto`,
+    plank: `background-color:${a};background-image:linear-gradient(0deg,rgba(0,0,0,.22) 1px,transparent 1px),repeating-linear-gradient(90deg,${b} 0 1px,transparent 1px 13px,${c} 13px 14px,transparent 14px 27px);background-size:100% 30px,100% 100%`,
+    stone: `background-color:${a};background-image:radial-gradient(ellipse at 30% 35%,${b} 0,transparent 45%),radial-gradient(ellipse at 72% 70%,${c} 0,transparent 40%),linear-gradient(90deg,rgba(0,0,0,.14) 1px,transparent 1px),linear-gradient(0deg,rgba(0,0,0,.14) 1px,transparent 1px);background-size:100% 100%,100% 100%,33.4% 100%,100% 50%`,
+    rubber: `background-color:${a};background-image:radial-gradient(${b} 1px,transparent 1.6px),radial-gradient(${c} 1px,transparent 1.6px);background-size:9px 9px,13px 13px;background-position:0 0,4px 6px`
+  };
+  return pats[p.pattern] || `background:${a}`;
+}
+
+/* Commerce catalog excerpt: what "Add product" searches in the real build (GraphQL products query). */
+const CATALOG = [
+  { sku: "BL-4410-D04", name: "Tidewater Broadloom", colorway: "Driftwood 04", type: "Broadloom carpet", pattern: "loop", colors: ["#A89B86", "#857866", "#C8BCA6"],
+    specs: { Construction: "Tufted level loop", Fiber: "Solution-dyed nylon 6,6", Gauge: "1/10\"", "Face weight": "32 oz/SY", Width: "12'", Backing: "ActionBac", "Wear warranty": "15 yr" } },
+  { sku: "CT-2208-GR", name: "Linework Carpet Tile", colorway: "Graphite", type: "Modular carpet tile", pattern: "tile", colors: ["#4B4F52", "#5E6366", "#3A3D40"],
+    specs: { Size: "24\" × 24\"", Construction: "Tufted textured loop", Fiber: "Solution-dyed nylon", "Face weight": "18 oz/SY", Installation: "Quarter turn", Backing: "PVC-free cushion" } },
+  { sku: "AX-5120-C", name: "Meridian Axminster", colorway: "Custom · Harbor Navy/Brass", type: "Custom Axminster", pattern: "axminster", colors: ["#253A52", "#B9924E", "#6F8599"],
+    specs: { Construction: "Axminster, 7 × 10", Fiber: "80% wool / 20% nylon", Pitch: "7 per inch", Rows: "10 per inch", Width: "12'", "Pattern repeat": "36\" × 36\"", Colors: "8 (max 12)" } },
+  { sku: "LV-7031-CO", name: "Cask Oak LVT", colorway: "Smoked Cask", type: "Luxury vinyl plank", pattern: "plank", colors: ["#7A5A3E", "#6A4C33", "#8D6C4E"],
+    specs: { Size: "9\" × 48\" plank", Thickness: "5 mm", "Wear layer": "20 mil", Edge: "Micro-bevel", Installation: "Glue down", "Slip resistance": "DCOF ≥ 0.42" } },
+  { sku: "LV-7044-SS", name: "Salt Stone LVT", colorway: "Coastal Grey", type: "Luxury vinyl tile", pattern: "stone", colors: ["#B7B4AC", "#9E9A90", "#CFCBC2"],
+    specs: { Size: "18\" × 36\" tile", Thickness: "5 mm", "Wear layer": "20 mil", Edge: "Square", Installation: "Glue down", "Slip resistance": "DCOF ≥ 0.42" } },
+  { sku: "LV-7044-SL", name: "Salt Stone LVT", colorway: "Shell (lighter)", type: "Luxury vinyl tile", pattern: "stone", colors: ["#D6D2C8", "#C3BEB2", "#E4E0D7"],
+    specs: { Size: "18\" × 36\" tile", Thickness: "5 mm", "Wear layer": "20 mil", Edge: "Square", Installation: "Glue down", "Slip resistance": "DCOF ≥ 0.42" } },
+  { sku: "AX-9002-C", name: "Grand Hall Axminster", colorway: "Custom · Ballroom Scheme A", type: "Custom Axminster", pattern: "axminster", colors: ["#5A2E2A", "#C9A45C", "#2F4A45"],
+    specs: { Construction: "Axminster, 7 × 10", Fiber: "80% wool / 20% nylon", Width: "12'", "Pattern repeat": "72\" × 72\"", Colors: "10 (max 12)" } },
+  { sku: "RB-1100-8", name: "Rebound Sport Rubber", colorway: "Charcoal Fleck 10%", type: "Rubber sport flooring", pattern: "rubber", colors: ["#2E3133", "#8A9094", "#5D8FA8"],
+    specs: { Format: "4' × 6' tile", Thickness: "8 mm", Material: "Recycled SBR + EPDM fleck", Installation: "Loose lay or adhered" } },
+  { sku: "CT-3310-MS", name: "Shoreline Carpet Tile", colorway: "Moss", type: "Modular carpet tile", pattern: "tile", colors: ["#5E6B4E", "#707D5F", "#4C583F"],
+    specs: { Size: "9\" × 36\" plank", Construction: "Tufted multi-level loop", Fiber: "Solution-dyed nylon", "Face weight": "20 oz/SY" } },
+  { sku: "BL-4488-HZ", name: "Harbour Cut Pile", colorway: "Haze 11", type: "Broadloom carpet", pattern: "loop", colors: ["#8C9296", "#767C80", "#A7ADB0"],
+    specs: { Construction: "Tufted cut pile", Fiber: "Solution-dyed nylon 6,6", Gauge: "1/10\"", "Face weight": "38 oz/SY", Width: "12'" } }
+];
+const bySku = s => CATALOG.find(p => p.sku === s);
+
+let seq = 100;
+const id = p => p + (++seq);
+
+const PROJECTS = [
+  {
+    id: "p1", slug: "harbor-pine-austin", name: "Harbor & Pine Hotel · Austin Downtown", brand: "Harbor & Pine Hotels", city: "Austin, TX",
+    keys: 212, stage: "Design Development", openingTarget: "Q4 2027", band: "#1F3F52", rep: "dana",
+    areas: [
+      { id: "a1", name: "Guest Rooms", qty: "5,900 SY" },
+      { id: "a2", name: "Guestroom Corridors", qty: "2,150 SY" },
+      { id: "a3", name: "Lobby & Lounge", qty: "6,400 SF" },
+      { id: "a4", name: "Ballroom & Prefunction", qty: "1,300 SY" },
+      { id: "a5", name: "Fitness Center", qty: "1,800 SF" }
+    ],
+    selections: [
+      { id: "s1", area: "a1", sku: "BL-4410-D04", status: "approved", qty: "5,900 SY", note: "Basis of design per brand standard FF-04.",
+        reviews: [
+          { user: "priya", decision: "approve", comment: "Matches the brand standard board. Approved.", when: "Sep 12" },
+          { user: "marco", decision: "approve", comment: "Good with Driftwood 04 against the headboard wall finish.", when: "Sep 12" },
+          { user: "jordan", decision: "approve", comment: "Within budget at the quoted rate.", when: "Sep 13" } ] },
+      { id: "s2", area: "a1", sku: "CT-2208-GR", status: "alternate", qty: "5,900 SY", note: "Value-engineering alternate if broadloom lead time slips.", reviews: [] },
+      { id: "s3", area: "a2", sku: "AX-5120-C", status: "in_review", qty: "2,150 SY", note: "Strike-off in production. Pattern scaled to 36\" repeat for 6' corridor width.",
+        reviews: [
+          { user: "priya", decision: "approve", comment: "Navy and brass are right for the brand. Approved pending strike-off.", when: "Sep 24" },
+          { user: "marco", decision: "revise", comment: "Can we test the medallion at 30\"? At 36\" it lands off-centre at the door recesses.", when: "Sep 25" } ] },
+      { id: "s4", area: "a3", sku: "LV-7031-CO", status: "in_review", qty: "3,900 SF", note: "Lounge and bar zones.",
+        reviews: [ { user: "marco", decision: "approve", comment: "", when: "Sep 22" } ] },
+      { id: "s5", area: "a3", sku: "LV-7044-SS", status: "revise", qty: "2,500 SF", note: "Lobby entry and check-in.",
+        reviews: [ { user: "priya", decision: "revise", comment: "Too cool against the oak. Please show a warmer or lighter option.", when: "Sep 19" } ] },
+      { id: "s6", area: "a4", sku: "AX-9002-C", status: "proposed", qty: "1,300 SY", note: "Scheme A. Design team preparing CAD rendering.", reviews: [] },
+      { id: "s7", area: "a5", sku: "RB-1100-8", status: "approved", qty: "1,800 SF", note: "",
+        reviews: [
+          { user: "priya", decision: "approve", comment: "", when: "Aug 30" },
+          { user: "marco", decision: "approve", comment: "", when: "Aug 30" },
+          { user: "jordan", decision: "approve", comment: "", when: "Sep 2" } ] }
+    ],
+    samples: [
+      { id: "SR-10421", items: ["Tidewater Broadloom · Driftwood 04 · 18\"×18\" ×3"], shipTo: "Studio Kessel Architecture, Chicago", by: "marco", date: "Aug 28", status: "Delivered" },
+      { id: "SR-10433", items: ["Meridian Axminster · strike-off 3'×3'"], shipTo: "Harbor & Pine Design Studio, Atlanta", by: "priya", date: "Sep 25", status: "In production" },
+      { id: "SR-10440", items: ["Salt Stone LVT · Coastal Grey ×2", "Cask Oak LVT · Smoked Cask ×2"], shipTo: "Studio Kessel Architecture, Chicago", by: "marco", date: "Sep 26", status: "Requested" }
+    ],
+    docs: [
+      { id: "d1", name: "A-601 Finish Plan · Levels 2–12.pdf", cat: "Drawings", ver: "Rev C", size: "4.2 MB", by: "marco", date: "Sep 20" },
+      { id: "d2", name: "A-610 Lobby Floor Pattern Plan.pdf", cat: "Drawings", ver: "Rev A", size: "2.8 MB", by: "marco", date: "Sep 18" },
+      { id: "d3", name: "09 68 16 Sheet Carpeting.docx", cat: "Specs", ver: "v3", size: "88 KB", by: "kate", date: "Sep 15" },
+      { id: "d4", name: "09 65 19 Resilient Tile Flooring.docx", cat: "Specs", ver: "v2", size: "74 KB", by: "kate", date: "Sep 15" },
+      { id: "d5", name: "Submittal Package 01 · Guest Rooms.pdf", cat: "Submittals", ver: "v1", size: "11.6 MB", by: "dana", date: "Sep 16" },
+      { id: "d6", name: "Tidewater Broadloom · Spec Sheet.pdf", cat: "Product data", ver: "2026", size: "640 KB", by: "kate", date: "Aug 22", sku: "BL-4410-D04" },
+      { id: "d7", name: "Cask Oak LVT · Installation Guide.pdf", cat: "Product data", ver: "2026", size: "1.1 MB", by: "kate", date: "Aug 22", sku: "LV-7031-CO" },
+      { id: "d8", name: "Meridian Axminster · CAD Rendering R2.pdf", cat: "Product data", ver: "R2", size: "3.4 MB", by: "dana", date: "Sep 23", sku: "AX-5120-C" },
+      { id: "d9", name: "Tidewater Broadloom · EPD.pdf", cat: "Product data", ver: "2025", size: "520 KB", by: "kate", date: "Aug 22", sku: "BL-4410-D04" }
+    ],
+    quotes: [
+      { id: "Q-26-0418", ver: 2, title: "Guest Rooms & Corridors", date: "Sep 24", valid: "Nov 24", status: "Awaiting acceptance",
+        lines: [
+          { sku: "BL-4410-D04", desc: "Tidewater Broadloom · Driftwood 04", area: "Guest Rooms", qty: 5900, unit: "SY", price: 38.5 },
+          { sku: "AX-5120-C", desc: "Meridian Axminster · Custom", area: "Guestroom Corridors", qty: 2150, unit: "SY", price: 72.0 },
+          { sku: "FRT", desc: "Freight · jobsite, Austin TX", area: "", qty: 1, unit: "LOT", price: 6850 } ] },
+      { id: "Q-26-0377", ver: 1, title: "Guest Rooms & Corridors", date: "Sep 3", valid: "Oct 3", status: "Superseded",
+        lines: [
+          { sku: "BL-4410-D04", desc: "Tidewater Broadloom · Driftwood 04", area: "Guest Rooms", qty: 5900, unit: "SY", price: 39.75 },
+          { sku: "AX-5120-C", desc: "Meridian Axminster · Custom", area: "Guestroom Corridors", qty: 2150, unit: "SY", price: 74.5 } ] }
+    ],
+    threads: [
+      { id: "t1", subject: "Corridor Axminster: medallion scale", anchor: "s3", msgs: [
+        { user: "marco", when: "Sep 25, 9:12 AM", body: "At a 36\" repeat the medallion lands off-centre at every third door recess. Could the design team run a 30\" version?" },
+        { user: "dana", when: "Sep 25, 11:40 AM", body: "Yes. Design will have a 30\" rendering by Friday. The strike-off already in production is 36\", so we'd do a second strike-off if 30\" wins.", file: "corridor-door-spacing.pdf" },
+        { user: "priya", when: "Sep 25, 2:05 PM", body: "Brand is fine with either scale as long as the brass reads at the same weight." } ] },
+      { id: "t2", subject: "Lobby LVT: warmer option", anchor: "s5", msgs: [
+        { user: "priya", when: "Sep 19, 4:30 PM", body: "Coastal Grey reads cold next to the Cask Oak. What's the closest warmer or lighter colorway?" },
+        { user: "dana", when: "Sep 20, 8:55 AM", body: "Shell is the lighter, warmer option in the same size and wear layer. I've requested samples of both for Marco's board." } ] },
+      { id: "t3", subject: "Submittal Package 01 timing", anchor: null, msgs: [
+        { user: "jordan", when: "Sep 16, 10:02 AM", body: "GC needs Package 01 approved by Oct 16 to hold the Q2 install window." },
+        { user: "dana", when: "Sep 16, 10:30 AM", body: "Package 01 is uploaded under Documents › Submittals. Only the corridor Axminster is still open.", file: "Submittal Package 01 · Guest Rooms.pdf" } ] }
+    ],
+    team: [
+      { user: "dana", role: "Sales rep", status: "Active" },
+      { user: "kate", role: "Spec support", status: "Active" },
+      { user: "priya", role: "Customer admin · Reviewer", status: "Active" },
+      { user: "marco", role: "Reviewer", status: "Active" },
+      { user: "jordan", role: "Reviewer", status: "Active" },
+      { user: "sam", role: "Viewer", status: "Active" }
+    ],
+    milestones: [
+      { date: "Aug 29", label: "Schematic design sign-off", done: true },
+      { date: "Oct 16", label: "Package 01 approval (Guest Rooms & Corridors)" },
+      { date: "Nov 20", label: "Package 02 approval (Lobby, Ballroom, Fitness)" },
+      { date: "Apr 2027", label: "Guestroom install start, levels 2–6" }
+    ],
+    activity: [
+      { user: "marco", text: "requested a revision on <b>Meridian Axminster</b>", when: "Sep 25" },
+      { user: "priya", text: "requested a sample of <b>Meridian Axminster</b> strike-off", when: "Sep 25" },
+      { user: "dana", text: "sent quote <b>Q-26-0418 v2</b>", when: "Sep 24" },
+      { user: "dana", text: "uploaded <b>Meridian Axminster · CAD Rendering R2</b>", when: "Sep 23" },
+      { user: "marco", text: "approved <b>Cask Oak LVT</b>", when: "Sep 22" }
+    ]
+  },
+  {
+    id: "p2", slug: "the-linwood-nashville", name: "The Linwood · Nashville", brand: "Linwood Collection", city: "Nashville, TN",
+    keys: 148, stage: "Construction Documents", openingTarget: "Q2 2027", band: "#5A3A2C", rep: "dana",
+    areas: [ { id: "b1", name: "Guest Rooms", qty: "4,100 SY" }, { id: "b2", name: "Corridors", qty: "1,500 SY" } ],
+    selections: [
+      { id: "s21", area: "b1", sku: "BL-4488-HZ", status: "approved", qty: "4,100 SY", note: "", reviews: [ { user: "priya", decision: "approve", comment: "", when: "Aug 12" } ] },
+      { id: "s22", area: "b2", sku: "CT-3310-MS", status: "in_review", qty: "1,500 SY", note: "", reviews: [] }
+    ],
+    samples: [], docs: [], quotes: [], threads: [], team: [ { user: "dana", role: "Sales rep", status: "Active" }, { user: "priya", role: "Customer admin · Reviewer", status: "Active" } ],
+    milestones: [ { date: "Oct 30", label: "Final submittal approval" } ], activity: []
+  },
+  {
+    id: "p3", slug: "crestline-suites-dtc", name: "Crestline Suites · Denver Tech Center", brand: "Crestline Suites", city: "Greenwood Village, CO",
+    keys: 180, stage: "Schematic Design", openingTarget: "Q1 2028", band: "#34503A", rep: "dana",
+    areas: [ { id: "c1", name: "Guest Rooms", qty: "5,200 SY" } ],
+    selections: [ { id: "s31", area: "c1", sku: "CT-2208-GR", status: "proposed", qty: "5,200 SY", note: "Initial concept.", reviews: [] } ],
+    samples: [], docs: [], quotes: [], threads: [], team: [ { user: "dana", role: "Sales rep", status: "Active" }, { user: "jordan", role: "Reviewer", status: "Active" } ],
+    milestones: [ { date: "Dec 5", label: "Concept presentation" } ], activity: []
+  }
+];
+
+/* ---------- State ---------- */
+const TABS = ["overview", "selections", "samples", "documents", "quotes", "messages", "team"];
+const TAB_LABEL = { overview: "Overview", selections: "Selections", samples: "Samples", documents: "Documents", quotes: "Quotes", messages: "Messages", team: "Team" };
+const S = { view: "login", role: "brand", pid: "p1", tab: "overview", sel: null, modal: null,
+  f: { status: "all", q: "" }, docCat: "All", thread: "t1", sampleDraft: [], confirmQuote: null, toast: null };
+
+const $app = document.getElementById("app");
+const me = () => ROLES[S.role].user;
+const isStaff = () => USERS[me()].staff;
+const proj = () => PROJECTS.find(p => p.id === S.pid);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+const initials = u => USERS[u].name.split(" ").map(w => w[0]).join("");
+const av = u => `<span class="avatar" title="${esc(USERS[u].name)}">${initials(u)}</span>`;
+const chip = st => `<span class="chip s-${st}">${STATUS[st]}</span>`;
+const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+const canAdmin = () => isStaff() || proj().team.some(t => t.user === me() && t.role.startsWith("Customer admin"));
+const isReviewer = () => REVIEWERS.includes(me());
+
+function recompute(sel) {
+  if (sel.status === "alternate" || sel.status === "proposed" || sel.status === "rejected") return;
+  const d = REVIEWERS.map(u => (sel.reviews.find(r => r.user === u) || {}).decision);
+  if (d.includes("reject")) sel.status = "rejected";
+  else if (d.includes("revise")) sel.status = "revise";
+  else if (d.every(x => x === "approve")) sel.status = "approved";
+  else sel.status = "in_review";
+}
+function counts(p) {
+  const c = { approved: 0, in_review: 0, revise: 0, proposed: 0, alternate: 0, rejected: 0 };
+  p.selections.forEach(s => c[s.status]++);
+  return c;
+}
+function toast(msg) {
+  S.toast = msg; render();
+  clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 2600);
+}
+function setHash() {
+  try { history.replaceState(null, "", S.view === "project" ? "#" + S.tab : (S.view === "projects" ? "#projects" : "#")); } catch (e) {}
+}
+
+/* ---------- Views ---------- */
+function topbar() {
+  const opts = Object.entries(ROLES).map(([k, r]) => `<option value="${k}" ${k === S.role ? "selected" : ""}>${esc(r.label)}</option>`).join("");
+  return `<header class="topbar"><div class="topbar-in wrap">
+    <button class="brand" data-act="home"><span class="brand-mark" aria-hidden="true"></span>Selections Portal</button>
+    <span class="proto-tag">Prototype</span>
+    <span class="spacer"></span>
+    <label class="viewas"><span class="muted">Viewing as</span>
+      <select class="input" id="role-switch" aria-label="Viewing as">${opts}</select></label>
+    ${av(me())}
+  </div></header>`;
+}
+
+function loginView() {
+  return `<main class="login wrap"><div class="login-card">
+    <div class="login-art" role="img" aria-label="Axminster carpet pattern">
+      <div class="cap"><b>Project selections, in one place</b>Review finishes, request samples and sign off with your project team.</div>
+    </div>
+    <form class="login-form" data-form="login">
+      <div><p class="eyebrow">Selections Portal</p><h1>Sign in</h1></div>
+      <div class="field"><label for="login-email">Email</label><input class="input" id="login-email" type="email" value="priya.raman@harborpine.example" autocomplete="username"></div>
+      <div class="field"><label for="login-pass">Password</label><input class="input" id="login-pass" type="password" value="prototype" autocomplete="current-password"></div>
+      <button class="btn primary ms-btn" type="submit">Sign in</button>
+      <div class="divider">Staff</div>
+      <button class="btn ms-btn" type="button" data-act="login-staff"><span class="ms-logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Sign in with Microsoft</button>
+      <p class="note">Access is by invitation only. Your project team or your company's portal admin can invite you. Customer sign-in uses your store account; staff sign in with company SSO and Duo.</p>
+    </form>
+  </div></main>`;
+}
+
+function projectsView() {
+  const mine = PROJECTS.filter(p => isStaff() || p.team.some(t => t.user === me()));
+  const cards = mine.map(p => {
+    const c = counts(p), n = p.selections.length || 1;
+    const seg = (k, v) => `<i style="width:${(c[k] / n) * 100}%;background:var(--st-${v})"></i>`;
+    return `<button class="proj-card" data-act="open-project" data-id="${p.id}">
+      <div class="proj-band" style="background:${p.band}"><span class="keys">${p.keys} keys</span></div>
+      <div class="proj-body">
+        <h3>${esc(p.name)}</h3>
+        <div class="proj-meta"><span>${esc(p.stage)}</span><span>Opening ${esc(p.openingTarget)}</span><span>Rep: ${esc(USERS[p.rep].name)}</span></div>
+        <div class="bar" aria-label="Selection status">${seg("approved", "approved")}${seg("in_review", "review")}${seg("revise", "revise")}${seg("proposed", "proposed")}</div>
+        <div class="proj-meta num"><span>${c.approved} approved</span><span>${c.in_review + c.revise} open decisions</span></div>
+      </div></button>`;
+  }).join("");
+  return `<main class="page wrap">
+    <div class="sec-head"><div><p class="eyebrow">${isStaff() ? "Assigned to you" : esc(USERS[me()].org)}</p><h1>Projects</h1></div>
+      ${isStaff() ? `<button class="btn" data-act="toast" data-msg="In the real build, projects are created from the Salesforce opportunity.">+ Register project</button>` : ""}</div>
+    ${mine.length ? `<div class="proj-grid">${cards}</div>` : `<div class="panel empty">You haven't been added to a project yet.</div>`}
+  </main>`;
+}
+
+function projectView() {
+  const p = proj();
+  const c = counts(p);
+  const badge = { selections: c.in_review + c.revise, samples: p.samples.length, documents: p.docs.length, quotes: p.quotes.filter(q => q.status === "Awaiting acceptance").length, messages: p.threads.length, team: p.team.length };
+  const rail = TABS.map(t => `<button data-act="tab" data-tab="${t}" ${S.tab === t ? 'aria-current="page"' : ""}>${TAB_LABEL[t]}${badge[t] ? `<span class="count">${badge[t]}</span>` : ""}</button>`).join("");
+  const body = { overview, selections, samples, documents, quotes, messages, team }[S.tab]();
+  return `<section class="proj-head" style="background:${p.band}"><div class="proj-head-in wrap">
+      <div class="crumbs"><button data-act="home">Projects</button><span aria-hidden="true">›</span><span class="url">/${p.slug}${S.tab === "overview" ? "" : "/" + S.tab}</span></div>
+      <h1>${esc(p.name)}</h1>
+      <div class="facts"><span>${esc(p.brand)}</span><span>${esc(p.city)}</span><span>${p.keys} keys</span><span>${esc(p.stage)}</span><span>Opening ${esc(p.openingTarget)}</span></div>
+    </div></section>
+    <div class="work wrap"><nav class="rail" aria-label="Project sections">${rail}</nav><div class="content">${body}</div></div>`;
+}
+
+function overview() {
+  const p = proj(), c = counts(p), rep = USERS[p.rep];
+  const waiting = p.selections.filter(s => ["in_review", "revise"].includes(s.status) && isReviewer() && !s.reviews.some(r => r.user === me()));
+  const open = p.selections.filter(s => ["in_review", "revise", "proposed"].includes(s.status));
+  const list = isReviewer() ? waiting : open;
+  const todo = list.map(s => { const pr = bySku(s.sku); const a = p.areas.find(x => x.id === s.area);
+    return `<button class="todo" data-act="open-sel" data-id="${s.id}"><span class="mini-sw" style="${swatch(pr)}"></span>
+      <span class="grow"><b>${esc(pr.name)}</b> <span class="muted">· ${esc(pr.colorway)}</span><br><span class="muted">${esc(a.name)}</span></span>${chip(s.status)}</button>`; }).join("");
+  const feed = p.activity.map(a => `<div class="feed-item">${av(a.user)}<div><b>${esc(USERS[a.user].name)}</b> ${a.text}<br><span class="muted">${a.when}</span></div></div>`).join("");
+  const miles = p.milestones.map(m => `<div class="mile ${m.done ? "done" : ""}"><span class="mono">${esc(m.date)}</span><span>${esc(m.label)}</span></div>`).join("");
+  return `
+    <div class="panel">
+      <div class="panel-pad sec-head"><div><p class="eyebrow">Decision tracker</p><h2>${p.selections.length} selections across ${p.areas.length} areas</h2></div>
+        <button class="btn" data-act="tab" data-tab="selections">Open selections</button></div>
+      <div class="tally num">
+        <div><b style="color:var(--st-approved)">${c.approved}</b><span class="muted">Approved</span></div>
+        <div><b style="color:var(--st-review)">${c.in_review}</b><span class="muted">In review</span></div>
+        <div><b style="color:var(--st-revise)">${c.revise}</b><span class="muted">Revision requested</span></div>
+        <div><b style="color:var(--st-proposed)">${c.proposed + c.alternate}</b><span class="muted">Proposed / alternate</span></div>
+      </div>
+    </div>
+    <div class="ov-grid">
+      <div style="display:grid;gap:20px;align-content:start;min-width:0">
+        <div class="panel"><div class="panel-pad"><h3>${isReviewer() ? "Waiting on your review" : "Open decisions"}</h3></div>
+          <div class="list">${todo || `<div class="empty">Nothing waiting on you.</div>`}</div></div>
+        <div class="panel"><div class="panel-pad"><h3>Recent activity</h3></div><div class="list">${feed || `<div class="empty">No activity yet.</div>`}</div></div>
+      </div>
+      <div style="display:grid;gap:20px;align-content:start;min-width:0">
+        <div class="panel panel-pad" style="display:grid;gap:12px">
+          <p class="eyebrow">Your project rep</p>
+          <div class="rep">${av(p.rep)}<div><b>${esc(rep.name)}</b><br><span class="muted">${esc(rep.title)}</span></div></div>
+          <div class="copyline"><span class="mono">${esc(rep.email)}</span><button class="btn ghost sm" data-act="copy" data-text="${esc(rep.email)}">Copy</button></div>
+          <div class="copyline"><span class="mono">${esc(rep.phone)}</span><button class="btn ghost sm" data-act="copy" data-text="${esc(rep.phone)}">Copy</button></div>
+          <button class="btn primary" data-act="tab" data-tab="messages">Message ${esc(rep.name.split(" ")[0])}</button>
+        </div>
+        <div class="panel"><div class="panel-pad"><h3>Milestones</h3></div><div class="miles">${miles}</div></div>
+      </div>
+    </div>`;
+}
+
+function selections() {
+  const p = proj();
+  const q = S.f.q.trim().toLowerCase();
+  const match = s => { const pr = bySku(s.sku);
+    return (S.f.status === "all" || s.status === S.f.status || (S.f.status === "open" && ["in_review", "revise"].includes(s.status)))
+      && (!q || [pr.name, pr.colorway, pr.sku, pr.type].join(" ").toLowerCase().includes(q)); };
+  const segs = [["all", "All"], ["open", "Needs decision"], ["approved", "Approved"], ["proposed", "Proposed"], ["alternate", "Alternates"]]
+    .map(([k, l]) => `<button data-act="filter" data-v="${k}" aria-pressed="${S.f.status === k}">${l}</button>`).join("");
+  const blocks = p.areas.map(a => {
+    const items = p.selections.filter(s => s.area === a.id && match(s));
+    if (!items.length) return "";
+    return `<section class="area-block"><div class="area-head"><h3>${esc(a.name)}</h3><span class="mono muted">${esc(a.qty)}</span></div>
+      <div class="cards">${items.map(card).join("")}</div></section>`;
+  }).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Project catalog</p><h2>Selections</h2></div>
+      ${isStaff() ? `<button class="btn primary" data-act="add-product">+ Add product</button>` : ""}</div>
+    <div class="toolbar"><div class="seg" role="group" aria-label="Filter by status">${segs}</div>
+      <input class="input search" id="sel-search" type="search" placeholder="Search name, SKU, colorway" value="${esc(S.f.q)}"></div>
+    ${blocks || `<div class="panel empty">No selections match these filters.</div>`}`;
+}
+function card(s) {
+  const pr = bySku(s.sku);
+  const dots = REVIEWERS.map(u => { const r = s.reviews.find(x => x.user === u); return `<i class="${r ? r.decision : ""}" title="${esc(USERS[u].name)}: ${r ? r.decision : "pending"}"></i>`; }).join("");
+  const approvals = s.reviews.filter(r => r.decision === "approve").length;
+  return `<button class="card" data-act="open-sel" data-id="${s.id}">
+    <div class="sw" style="${swatch(pr)}">${chip(s.status)}</div>
+    <div class="card-body"><h3>${esc(pr.name)}</h3><span class="muted">${esc(pr.colorway)}</span>
+      <span class="mono muted">${esc(pr.sku)} · ${esc(pr.type)}</span>
+      <div class="card-foot"><span class="num">${esc(s.qty)}</span><span style="display:inline-flex;gap:.4rem;align-items:center"><span class="votes">${dots}</span>${approvals}/3</span></div>
+    </div></button>`;
+}
+
+function drawer() {
+  const p = proj(), s = p.selections.find(x => x.id === S.sel); if (!s) return "";
+  const pr = bySku(s.sku), a = p.areas.find(x => x.id === s.area);
+  const specs = Object.entries(pr.specs).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  const docs = p.docs.filter(d => d.sku === s.sku);
+  const mine = s.reviews.find(r => r.user === me());
+  const reviews = REVIEWERS.map(u => { const r = s.reviews.find(x => x.user === u);
+    const lab = r ? { approve: ["approved", "Approved"], revise: ["revise", "Revision requested"], reject: ["rejected", "Rejected"] }[r.decision] : ["muted", "Pending"];
+    return `<div class="review">${av(u)}<div><div class="who"><b>${esc(USERS[u].name)}</b><span class="muted">${esc(USERS[u].org)}</span><span class="chip s-${lab[0]}">${lab[1]}</span>${r ? `<span class="muted">${r.when}</span>` : ""}</div>
+      ${r && r.comment ? `<p>${esc(r.comment)}</p>` : ""}</div></div>`; }).join("");
+  const thread = p.threads.find(t => t.anchor === s.id);
+  const decide = isReviewer() && s.status !== "proposed" && s.status !== "alternate" ? `
+    <form class="decide" data-form="decide">
+      <b>${mine ? "Update your decision" : "Your decision"}</b>
+      <textarea class="input" id="decide-comment" placeholder="Comment for the project team (optional for approval)"></textarea>
+      <div class="row">
+        <button class="btn ok" type="submit" data-decision="approve">Approve</button>
+        <button class="btn warn" type="submit" data-decision="revise">Request revision</button>
+        <button class="btn ghost" type="submit" data-decision="reject">Reject</button>
+      </div></form>` : "";
+  const staffCtl = isStaff() ? `
+    <div class="decide"><b>Rep controls</b>
+      <div class="row">
+        ${s.status === "proposed" ? `<button class="btn primary" data-act="send-review">Send for review</button>` : ""}
+        ${s.status === "revise" || s.status === "rejected" ? `<button class="btn" data-act="add-product" data-alt="${s.area}">Propose alternate</button>` : ""}
+        <label class="field" style="min-width:200px"><span class="muted" style="font-size:.8rem">Set status</span>
+          <select class="input" id="staff-status">${Object.entries(STATUS).map(([k, l]) => `<option value="${k}" ${k === s.status ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      </div></div>` : "";
+  return `<div class="scrim" data-act="close"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="${esc(pr.name)}">
+    <div class="sw" style="${swatch(pr)}"><button class="close" data-act="close" aria-label="Close">×</button></div>
+    <div class="drawer-body">
+      <div style="display:grid;gap:.4rem">
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center">${chip(s.status)}<span class="mono muted">${esc(pr.sku)}</span></div>
+        <h2>${esc(pr.name)}</h2>
+        <span class="muted">${esc(pr.colorway)} · ${esc(pr.type)}</span>
+        <span><b>${esc(a.name)}</b> <span class="mono muted">· ${esc(s.qty)}</span></span>
+        ${s.note ? `<p class="note">${esc(s.note)}</p>` : ""}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button class="btn" data-act="req-sample" data-id="${s.id}">Request sample</button>
+        ${thread ? `<button class="btn" data-act="goto-thread" data-id="${thread.id}">Discussion (${thread.msgs.length})</button>` : `<button class="btn" data-act="new-thread-for" data-id="${s.id}">Ask a question</button>`}
+      </div>
+      ${decide}${staffCtl}
+      <div><h3 style="margin-bottom:.4rem">Reviews <span class="muted num" style="font-weight:400">${s.reviews.filter(r => r.decision === "approve").length} of 3 approved</span></h3>${reviews}</div>
+      <div><h3 style="margin-bottom:.6rem">Specifications</h3><dl class="kv">${specs}</dl></div>
+      <div><h3 style="margin-bottom:.4rem">Documents</h3>${docs.length ? docs.map(d => `<div class="cat-row"><span class="ftype">PDF</span><span class="grow">${esc(d.name)}<br><span class="muted mono">${esc(d.ver)} · ${esc(d.size)}</span></span><button class="btn sm" data-act="toast" data-msg="Downloads use short-lived signed links in the real build.">Download</button></div>`).join("") : `<p class="muted">No product documents attached yet.</p>`}</div>
+    </div>
+  </aside>`;
+}
+
+function addModal() {
+  const p = proj();
+  const inProj = new Set(p.selections.map(s => s.sku));
+  const q = (S.modal.q || "").toLowerCase();
+  const rows = CATALOG.filter(c => !q || [c.name, c.sku, c.colorway, c.type].join(" ").toLowerCase().includes(q)).map(c => `
+    <div class="cat-row"><span class="mini-sw" style="${swatch(c)}"></span><span class="grow"><b>${esc(c.name)}</b> · ${esc(c.colorway)}<br><span class="mono muted">${esc(c.sku)} · ${esc(c.type)}</span></span>
+    ${inProj.has(c.sku) ? `<span class="muted" style="font-size:.8rem">In project</span>` : `<button class="btn sm" data-act="add-sku" data-sku="${c.sku}">Add</button>`}</div>`).join("");
+  const areaOpts = p.areas.map(a => `<option value="${a.id}" ${a.id === S.modal.area ? "selected" : ""}>${esc(a.name)}</option>`).join("");
+  return `<div class="scrim" data-act="close"></div><div class="modal" role="dialog" aria-modal="true" aria-label="Add product">
+    <div class="sec-head"><div><p class="eyebrow">From store catalog</p><h2>${S.modal.alt ? "Propose alternate" : "Add product"}</h2></div><button class="btn ghost" data-act="close">Close</button></div>
+    <div class="form-grid">
+      <div class="field"><label for="add-area">Area</label><select class="input" id="add-area">${areaOpts}</select></div>
+      <div class="field"><label for="add-q">Search catalog</label><input class="input" id="add-q" type="search" value="${esc(S.modal.q || "")}" placeholder="Name or SKU"></div>
+    </div>
+    <div>${rows || `<p class="muted">No catalog match. Custom items can be added as project-only products.</p>`}</div>
+  </div>`;
+}
+
+function samples() {
+  const p = proj();
+  const opts = p.selections.map(s => { const pr = bySku(s.sku);
+    return `<label><input type="checkbox" name="sample" value="${s.id}" ${S.sampleDraft.includes(s.id) ? "checked" : ""}><span class="mini-sw" style="${swatch(pr)};width:28px;height:28px"></span><span>${esc(pr.name)} <span class="muted">· ${esc(pr.colorway)}</span></span></label>`; }).join("");
+  const rows = p.samples.map(r => `<tr><td class="mono">${r.id}</td><td>${r.items.map(esc).join("<br>")}</td><td>${esc(r.shipTo)}</td><td>${esc(USERS[r.by].name)}<br><span class="muted">${r.date}</span></td>
+    <td><span class="chip ${r.status === "Delivered" ? "s-approved" : r.status === "Requested" ? "s-proposed" : "s-in_review"}">${r.status}</span></td></tr>`).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Physical samples & strike-offs</p><h2>Samples</h2></div></div>
+    <form class="panel panel-pad" data-form="sample" style="display:grid;gap:14px">
+      <h3>New sample request</h3>
+      <div class="checks">${opts}</div>
+      <div class="form-grid">
+        <div class="field"><label for="smp-qty">Size and quantity</label><select class="input" id="smp-qty"><option>18" × 18" hand sample ×2</option><option>Full tile / plank ×1</option><option>Strike-off 3' × 3'</option><option>Design board set</option></select></div>
+        <div class="field"><label for="smp-date">Needed by</label><input class="input" id="smp-date" type="date" value="2026-10-09"></div>
+        <div class="field full"><label for="smp-ship">Ship to</label><input class="input" id="smp-ship" value="${esc(USERS[me()].org)}"></div>
+      </div>
+      <div><button class="btn primary" type="submit">Submit request</button></div>
+    </form>
+    <div class="panel tbl-wrap"><table><thead><tr><th>Request</th><th>Items</th><th>Ship to</th><th>Requested</th><th>Status</th></tr></thead><tbody>${rows || `<tr><td colspan="5" class="muted">No sample requests yet.</td></tr>`}</tbody></table></div>`;
+}
+
+function documents() {
+  const p = proj();
+  const cats = ["All", "Drawings", "Specs", "Submittals", "Product data"];
+  const segs = cats.map(c => `<button data-act="doccat" data-v="${c}" aria-pressed="${S.docCat === c}">${c}</button>`).join("");
+  const list = p.docs.filter(d => S.docCat === "All" || d.cat === S.docCat);
+  const ext = n => (n.split(".").pop() || "").toUpperCase().slice(0, 4);
+  const rows = list.map(d => `<tr><td><div class="doc-name"><span class="ftype">${ext(d.name)}</span><div>${esc(d.name)}</div></div></td><td>${esc(d.cat)}</td><td class="mono">${esc(d.ver)}</td><td>${esc(USERS[d.by].name)}<br><span class="muted">${esc(d.date)}</span></td><td class="r mono">${esc(d.size)}</td>
+    <td><button class="btn sm" data-act="toast" data-msg="Downloads use short-lived signed links in the real build.">Download</button></td></tr>`).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Drawings, specifications & submittals</p><h2>Documents</h2></div></div>
+    <label class="drop" id="drop"><b>Drop files to upload</b><span>or choose files. PDF, DWG, DOCX, XLSX, images</span>
+      <input type="file" id="doc-upload" multiple style="max-width:100%"></label>
+    <div class="seg" role="group" aria-label="Filter by category">${segs}</div>
+    <div class="panel tbl-wrap"><table><thead><tr><th>Name</th><th>Category</th><th>Version</th><th>Uploaded</th><th class="r">Size</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="6" class="muted">No documents in this category.</td></tr>`}</tbody></table></div>`;
+}
+
+function quotes() {
+  const p = proj();
+  if (!p.quotes.length) return `<div class="sec-head"><h2>Quotes</h2></div><div class="panel empty">No quotes yet. Your rep will post quotes here.</div>`;
+  const blocks = p.quotes.map(q => {
+    const total = q.lines.reduce((t, l) => t + l.qty * l.price, 0);
+    const st = q.status === "Accepted" ? "s-approved" : q.status === "Superseded" ? "s-muted" : "s-in_review";
+    const lines = q.lines.map(l => `<tr><td class="mono">${esc(l.sku)}</td><td>${esc(l.desc)}${l.area ? `<br><span class="muted">${esc(l.area)}</span>` : ""}</td><td class="r">${l.qty.toLocaleString()} ${l.unit}</td><td class="r">${money(l.price)}</td><td class="r">${money(l.qty * l.price)}</td></tr>`).join("");
+    const canAccept = q.status === "Awaiting acceptance" && canAdmin() && !isStaff();
+    return `<div class="panel"><div class="quote-head">
+        <div style="display:grid;gap:.25rem"><span class="mono muted">${q.id} · v${q.ver}</span><h3>${esc(q.title)}</h3><span class="muted">Issued ${q.date} · valid until ${q.valid}</span></div>
+        <div style="display:grid;gap:.5rem;justify-items:end;align-content:start"><span class="chip ${st}">${q.status}</span><b class="num" style="font-family:var(--f-display);font-size:1.4rem">${money(total)}</b></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>SKU</th><th>Description</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Extended</th></tr></thead><tbody>${lines}</tbody>
+        <tfoot><tr><td colspan="4">Total (excl. tax)</td><td class="r">${money(total)}</td></tr></tfoot></table></div>
+      ${q.status === "Superseded" ? "" : S.confirmQuote === q.id ? `<div class="confirm"><b>Accept ${q.id} v${q.ver} for ${money(total)}?</b><span class="muted">Your rep is notified and the order is prepared for your PO.</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="accept-quote" data-id="${q.id}">Confirm acceptance</button><button class="btn ghost" data-act="cancel-quote">Cancel</button></div></div>`
+        : `<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 18px"><button class="btn" data-act="toast" data-msg="Opens the quote PDF in the real build.">View PDF</button>
+          ${canAccept ? `<button class="btn primary" data-act="ask-accept" data-id="${q.id}">Accept quote</button>` : ""}
+          <button class="btn ghost" data-act="tab" data-tab="messages">Ask about this quote</button></div>`}
+    </div>`;
+  }).join("");
+  return `<div class="sec-head"><div><p class="eyebrow">Pricing</p><h2>Quotes</h2></div>${isStaff() ? `<button class="btn primary" data-act="toast" data-msg="Staff upload a quote PDF and line items (phase 1), or pull from Salesforce/M3 (phase 2).">+ Post quote</button>` : ""}</div>${blocks}`;
+}
+
+function messages() {
+  const p = proj();
+  if (!p.threads.length && S.thread !== "new") S.thread = "new";
+  const t = p.threads.find(x => x.id === S.thread);
+  const anchorName = id => { const s = p.selections.find(x => x.id === id); return s ? bySku(s.sku).name : ""; };
+  const list = p.threads.map(th => `<button class="thread-btn" data-act="thread" data-id="${th.id}" aria-current="${th.id === S.thread}">
+      <b>${esc(th.subject)}</b>${th.anchor ? `<span class="anchor">↳ ${esc(anchorName(th.anchor))}</span>` : ""}
+      <span class="muted" style="font-size:.8rem">${esc(USERS[th.msgs[th.msgs.length - 1].user].name)} · ${esc(th.msgs[th.msgs.length - 1].when)}</span></button>`).join("");
+  const convo = t ? `<div class="convo-head"><h3>${esc(t.subject)}</h3>${t.anchor ? `<button class="btn ghost sm" style="justify-self:start" data-act="open-sel" data-id="${t.anchor}">↳ ${esc(anchorName(t.anchor))}</button>` : ""}</div>
+      <div class="msgs">${t.msgs.map(m => `<div class="msg ${USERS[m.user].staff ? "staff" : ""}">${av(m.user)}<div><div class="meta"><b>${esc(USERS[m.user].name)}</b>${USERS[m.user].staff ? `<span class="staff-tag">Staff</span>` : `<span>${esc(USERS[m.user].org)}</span>`}<span>${esc(m.when)}</span></div>
+        <div class="bubble">${esc(m.body)}${m.file ? `<div><span class="attach">📎 ${esc(m.file)}</span></div>` : ""}</div></div></div>`).join("")}</div>
+      <form class="composer" data-form="reply"><label for="reply-body" class="eyebrow">Reply to everyone on this thread</label><textarea class="input" id="reply-body" placeholder="Write a message"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><input type="file" id="reply-file" style="max-width:100%"><button class="btn primary" type="submit">Send</button></div></form>`
+    : `<div class="convo-head"><h3>New thread</h3></div>
+      <form class="composer" data-form="new-thread" style="border-top:0">
+        <div class="field"><label for="nt-subject">Subject</label><input class="input" id="nt-subject" value="${esc(S.ntSubject || "")}"></div>
+        <div class="field"><label for="nt-anchor">About a selection (optional)</label><select class="input" id="nt-anchor"><option value="">General</option>${p.selections.map(s => `<option value="${s.id}" ${S.ntAnchor === s.id ? "selected" : ""}>${esc(bySku(s.sku).name)} · ${esc(bySku(s.sku).colorway)}</option>`).join("")}</select></div>
+        <div class="field"><label for="nt-body">Message</label><textarea class="input" id="nt-body"></textarea></div>
+        <div><button class="btn primary" type="submit">Start thread</button></div></form><div></div>`;
+  return `<div class="sec-head"><div><p class="eyebrow">Project conversations</p><h2>Messages</h2></div><button class="btn" data-act="thread" data-id="new">+ New thread</button></div>
+    <div class="panel msg-layout"><div class="threads">${list || `<div class="empty">No threads yet.</div>`}</div><div class="convo">${convo}</div></div>`;
+}
+
+function team() {
+  const p = proj();
+  const rows = p.team.map(m => `<div class="team-row">${av(m.user)}<div><b>${esc(USERS[m.user].name)}</b> ${USERS[m.user].staff ? `<span class="staff-tag">Staff</span>` : ""}<br><span class="muted">${esc(USERS[m.user].title)} · ${esc(USERS[m.user].org)}</span></div>
+    <div style="text-align:right"><span>${esc(m.role)}</span><br><span class="chip ${m.status === "Active" ? "s-approved" : "s-proposed"}">${m.status}</span></div></div>`).join("");
+  const invite = canAdmin() ? `<form class="panel panel-pad" data-form="invite" style="display:grid;gap:14px">
+      <div><h3>Invite someone</h3><p class="muted">They'll get an email invite to this project only.</p></div>
+      <div class="form-grid">
+        <div class="field"><label for="inv-name">Full name</label><input class="input" id="inv-name" required></div>
+        <div class="field"><label for="inv-email">Email</label><input class="input" id="inv-email" type="email" required></div>
+        <div class="field"><label for="inv-org">Company</label><input class="input" id="inv-org" value="${isStaff() ? "" : esc(USERS[me()].org)}"></div>
+        <div class="field"><label for="inv-role">Project role</label><select class="input" id="inv-role"><option>Reviewer</option><option>Viewer</option>${isStaff() ? "<option>Customer admin · Reviewer</option>" : ""}</select></div>
+      </div><div><button class="btn primary" type="submit">Send invite</button></div></form>`
+    : `<p class="note">Only your company's portal admin or your rep can invite people.</p>`;
+  return `<div class="sec-head"><div><p class="eyebrow">Who can see this project</p><h2>Team</h2></div></div>
+    <div class="panel"><div class="list">${rows}</div></div>${invite}`;
+}
+
+/* ---------- Render + events ---------- */
+function render() {
+  const main = S.view === "login" ? loginView() : S.view === "projects" ? projectsView() : projectView();
+  const overlay = S.view === "project" && S.modal ? addModal() : S.view === "project" && S.sel ? drawer() : "";
+  const active = document.activeElement && document.activeElement.id;
+  const caret = active && document.activeElement.selectionStart;
+  $app.innerHTML = (S.view === "login" ? "" : topbar()) + main + overlay + (S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : "");
+  if (active && (active === "sel-search" || active === "add-q")) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) {} } }
+  setHash();
+}
+function go(patch) { Object.assign(S, patch); render(); if (patch.tab || patch.view) window.scrollTo({ top: 0 }); }
+
+$app.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act, p = S.view === "project" ? proj() : null;
+  switch (a) {
+    case "login-staff": return go({ view: "projects", role: "rep" });
+    case "home": return go({ view: "projects", sel: null, modal: null });
+    case "open-project": return go({ view: "project", pid: el.dataset.id, tab: "overview", sel: null, thread: (PROJECTS.find(x => x.id === el.dataset.id).threads[0] || {}).id || "new" });
+    case "tab": return go({ tab: el.dataset.tab, sel: null, modal: null });
+    case "open-sel": return go({ sel: el.dataset.id, modal: null });
+    case "close": return go({ sel: null, modal: null });
+    case "filter": S.f.status = el.dataset.v; return render();
+    case "doccat": S.docCat = el.dataset.v; return render();
+    case "thread": S.ntSubject = ""; S.ntAnchor = ""; return go({ thread: el.dataset.id });
+    case "goto-thread": return go({ tab: "messages", thread: el.dataset.id, sel: null });
+    case "new-thread-for": { const s = p.selections.find(x => x.id === el.dataset.id); S.ntSubject = "Question about " + bySku(s.sku).name; S.ntAnchor = s.id; return go({ tab: "messages", thread: "new", sel: null }); }
+    case "req-sample": S.sampleDraft = [el.dataset.id]; return go({ tab: "samples", sel: null });
+    case "add-product": return go({ modal: { area: el.dataset.alt || p.areas[0].id, q: "", alt: !!el.dataset.alt }, sel: null });
+    case "add-sku": {
+      const area = document.getElementById("add-area").value;
+      const sel = { id: id("s"), area, sku: el.dataset.sku, status: S.modal.alt ? "in_review" : "proposed", qty: p.areas.find(x => x.id === area).qty, note: S.modal.alt ? "Alternate proposed by your rep." : "", reviews: [] };
+      p.selections.push(sel);
+      p.activity.unshift({ user: me(), text: `added <b>${esc(bySku(sel.sku).name)}</b> to ${esc(p.areas.find(x => x.id === area).name)}`, when: "Just now" });
+      S.modal = null; S.tab = "selections"; return toast(`${bySku(sel.sku).name} added. Snapshot taken from the store catalog.`);
+    }
+    case "send-review": { const s = p.selections.find(x => x.id === S.sel); s.status = "in_review"; return toast("Sent for review. Reviewers are notified by email."); }
+    case "ask-accept": S.confirmQuote = el.dataset.id; return render();
+    case "cancel-quote": S.confirmQuote = null; return render();
+    case "accept-quote": { const q = p.quotes.find(x => x.id === el.dataset.id); q.status = "Accepted"; S.confirmQuote = null;
+      p.activity.unshift({ user: me(), text: `accepted quote <b>${q.id} v${q.ver}</b>`, when: "Just now" }); return toast(`${q.id} accepted. ${USERS[p.rep].name} has been notified.`); }
+    case "copy": { const t = el.dataset.text; const done = () => toast("Copied"); try { navigator.clipboard.writeText(t).then(done, () => toast("Select the text to copy it")); } catch (err) { toast("Select the text to copy it"); } return; }
+    case "toast": return toast(el.dataset.msg);
+  }
+});
+
+$app.addEventListener("submit", e => {
+  const f = e.target.closest("[data-form]"); if (!f) return;
+  e.preventDefault();
+  const p = S.view === "project" ? proj() : null, kind = f.dataset.form;
+  if (kind === "login") return go({ view: "projects", role: "brand" });
+  if (kind === "decide") {
+    const decision = (e.submitter && e.submitter.dataset.decision) || "approve";
+    const comment = document.getElementById("decide-comment").value.trim();
+    if (decision !== "approve" && !comment) return toast("Add a comment so the team knows what to change.");
+    const s = p.selections.find(x => x.id === S.sel);
+    s.reviews = s.reviews.filter(r => r.user !== me()).concat({ user: me(), decision, comment, when: "Just now" });
+    recompute(s);
+    const verb = { approve: "approved", revise: "requested a revision on", reject: "rejected" }[decision];
+    p.activity.unshift({ user: me(), text: `${verb} <b>${esc(bySku(s.sku).name)}</b>`, when: "Just now" });
+    return toast(`Decision recorded. Status is now "${STATUS[s.status]}".`);
+  }
+  if (kind === "sample") {
+    const picked = [...f.querySelectorAll("input[name=sample]:checked")].map(i => i.value);
+    if (!picked.length) return toast("Choose at least one product.");
+    const size = document.getElementById("smp-qty").value;
+    p.samples.unshift({ id: "SR-" + (10441 + p.samples.length), items: picked.map(sid => { const pr = bySku(p.selections.find(x => x.id === sid).sku); return `${pr.name} · ${pr.colorway} · ${size}`; }),
+      shipTo: document.getElementById("smp-ship").value || USERS[me()].org, by: me(), date: "Just now", status: "Requested" });
+    S.sampleDraft = []; return toast("Sample request submitted. Your rep will confirm the ship date.");
+  }
+  if (kind === "reply") {
+    const body = document.getElementById("reply-body").value.trim(); const file = document.getElementById("reply-file").files[0];
+    if (!body && !file) return;
+    p.threads.find(x => x.id === S.thread).msgs.push({ user: me(), when: "Just now", body, file: file && file.name });
+    return render();
+  }
+  if (kind === "new-thread") {
+    const subject = document.getElementById("nt-subject").value.trim(), body = document.getElementById("nt-body").value.trim();
+    if (!subject || !body) return toast("Add a subject and a message.");
+    const t = { id: id("t"), subject, anchor: document.getElementById("nt-anchor").value || null, msgs: [{ user: me(), when: "Just now", body }] };
+    p.threads.unshift(t); S.ntSubject = ""; S.ntAnchor = ""; return go({ thread: t.id });
+  }
+  if (kind === "invite") {
+    const name = document.getElementById("inv-name").value.trim(), email = document.getElementById("inv-email").value.trim();
+    const key = "u" + (++seq);
+    USERS[key] = { name, title: "Invited", org: document.getElementById("inv-org").value.trim() || "—", staff: false };
+    p.team.push({ user: key, role: document.getElementById("inv-role").value, status: "Invited" });
+    return toast(`Invite sent to ${email}.`);
+  }
+});
+
+$app.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "role-switch") {
+    S.role = t.value; S.confirmQuote = null;
+    if (S.view === "project" && !isStaff() && !proj().team.some(m => m.user === me())) S.view = "projects";
+    return render();
+  }
+  if (t.id === "staff-status") { const s = proj().selections.find(x => x.id === S.sel); s.status = t.value; return toast(`Status set to "${STATUS[t.value]}".`); }
+  if (t.id === "add-area") { S.modal.area = t.value; return; }
+  if (t.id === "doc-upload") addFiles(t.files);
+  if (t.name === "sample") S.sampleDraft = [...document.querySelectorAll("input[name=sample]:checked")].map(i => i.value);
+});
+$app.addEventListener("input", e => {
+  if (e.target.id === "sel-search") { S.f.q = e.target.value; render(); }
+  if (e.target.id === "add-q") { S.modal.q = e.target.value; render(); }
+});
+["dragover", "dragleave", "drop"].forEach(ev => $app.addEventListener(ev, e => {
+  const d = e.target.closest && e.target.closest("#drop"); if (!d) return;
+  e.preventDefault();
+  d.classList.toggle("over", ev === "dragover");
+  if (ev === "drop") addFiles(e.dataTransfer.files);
+}));
+function addFiles(files) {
+  const p = proj(); if (!files || !files.length) return;
+  const cat = S.docCat === "All" ? "Drawings" : S.docCat;
+  [...files].forEach(f => p.docs.unshift({ id: id("d"), name: f.name, cat, ver: "v1", size: (f.size / 1048576).toFixed(1) + " MB", by: me(), date: "Just now" }));
+  toast(`${files.length} file${files.length > 1 ? "s" : ""} added to ${cat}.`);
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && (S.sel || S.modal)) go({ sel: null, modal: null }); });
+
+/* Deep link: #selections etc. opens the sample project directly. */
+(function boot() {
+  const h = (location.hash || "").slice(1);
+  if (TABS.includes(h)) Object.assign(S, { view: "project", tab: h });
+  else if (h === "projects") S.view = "projects";
+  render();
+})();
+</script>
